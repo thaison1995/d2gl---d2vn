@@ -61,20 +61,6 @@ void fixPD2drawSolidRectEx(glm::ivec2& offset, int draw_mode)
 		offset.y += 1;
 }
 
-bool fixPD2drawGroundTile(const d2::TileContext* tile)
-{
-	if (App.pd2_fix && App.api == Api::Glide && tile) {
-		const auto len = strlen(tile->szTileName);
-		if (len > 8) {
-			const auto name = tile->szTileName + len - 8;
-			if (strcmp(name, "Warp.dt1") == 0)
-				return true;
-		}
-	}
-
-	return false;
-}
-
 void fixPD2invItemActions()
 {
 	if (!d2common_new_code || !App.pd2_fix)

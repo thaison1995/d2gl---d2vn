@@ -264,8 +264,13 @@ void __stdcall drawLineHooked(int x_start, int y_start, int x_end, int y_end, ui
 
 bool __stdcall drawGroundTileHooked(TileContext* tile, GFXLight* light, int x, int y, int world_x, int world_y, uint8_t alpha, int screen_panels, bool tile_data)
 {
-	if (fixPD2drawGroundTile(tile))
-		return true;
+	const auto len = strlen(tile->szTileName);
+	if (len > 8) {
+		const auto name = tile->szTileName + len - 8;
+		// Warp.dt1 is invisible and is used for functionality, no need to draw it
+		if (strcmp(name, "Warp.dt1") == 0)
+			return true;
+	}
 
 	const auto offset = modules::MotionPrediction::Instance().getGlobalOffset();
 	return drawGroundTile(tile, light, x - offset.x, y - offset.y, world_x, world_y, alpha, screen_panels, tile_data);
