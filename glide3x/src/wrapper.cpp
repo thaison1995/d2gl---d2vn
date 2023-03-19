@@ -467,8 +467,6 @@ void Wrapper::onBufferSwap()
 	option::Menu::instance().draw();
 
 	ctx->presentFrame();
-
-	fixPD2invItemActions();
 }
 
 void Wrapper::grDrawPoint(const void* pt)

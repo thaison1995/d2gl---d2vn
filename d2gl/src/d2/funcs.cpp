@@ -196,8 +196,6 @@ void uiDrawEnd()
 
 void __stdcall drawImageHooked(CellContext* cell, int x, int y, uint32_t gamma, int draw_mode, uint8_t* palette)
 {
-	fixPD2drawImage(x, y);
-
 	if (App.hd_cursor && App.game.draw_stage >= DrawStage::Cursor)
 		return;
 
@@ -215,8 +213,6 @@ void __stdcall drawPerspectiveImageHooked(CellContext* cell, int x, int y, uint3
 
 void __stdcall drawShiftedImageHooked(CellContext* cell, int x, int y, uint32_t gamma, int draw_mode, int global_palette_shift)
 {
-	fixPD2drawImage(x, y);
-
 	if (modules::HDText::Instance().drawShiftedImage(cell, x, y, gamma, draw_mode)) {
 		auto pos = modules::MotionPrediction::Instance().drawImage(x, y, D2DrawFn::ShiftedImage);
 		drawShiftedImage(cell, pos.x, pos.y, gamma, draw_mode, global_palette_shift);
@@ -250,7 +246,6 @@ void __stdcall drawShadowHooked(CellContext* cell, int x, int y)
 void __stdcall drawSolidRectExHooked(int left, int top, int right, int bottom, uint32_t color, int draw_mode)
 {
 	auto offset = modules::MotionPrediction::Instance().drawSolidRect();
-	fixPD2drawSolidRectEx(offset, draw_mode);
 
 	if (!modules::HDText::Instance().drawSolidRect(left - offset.x, top - offset.y, right - offset.x, bottom - offset.y, color, draw_mode))
 		drawSolidRectEx(left - offset.x, top - offset.y, right - offset.x, bottom - offset.y, color, draw_mode);

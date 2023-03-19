@@ -24,15 +24,10 @@
 
 namespace d2gl {
 
-int pd2_draw_ui = 0;
 int pd2_draw_shifted_image = 0;
 
 uintptr_t* PD2Fn1 = nullptr;
 uintptr_t* FreeResFn1 = nullptr;
-
-uintptr_t d2common_address = 0;
-uint8_t* d2common_old_code = nullptr;
-uint8_t* d2common_new_code = nullptr;
 
 uintptr_t d2client_address = 0;
 uint8_t* d2client_old_code = nullptr;
@@ -42,69 +37,6 @@ bool isPD2()
 {
 	static HANDLE handle = GetModuleHandleA("ProjectDiablo.dll");
 	return (bool)handle;
-}
-
-void fixPD2drawImage(int x, int y)
-{
-	if (pd2_draw_ui) {
-		if (App.hd_text) {
-			y = (App.api == Api::DDraw) ? y + 1 : y;
-			d2::drawSolidRectEx(x, y - 24, x + 24, y, 0, 5);
-		}
-		pd2_draw_shifted_image = 1;
-	}
-}
-
-void fixPD2drawSolidRectEx(glm::ivec2& offset, int draw_mode)
-{
-	if (pd2_draw_ui && App.api == Api::Glide && draw_mode == 2)
-		offset.y += 1;
-}
-
-void fixPD2invItemActions()
-{
-	if (!d2common_new_code || !App.pd2_fix)
-		return;
-
-	static bool* inventory = (bool*)helpers::getProcOffset(DLL_D2CLIENT, 0xFAD84);
-	static bool* stash = (bool*)helpers::getProcOffset(DLL_D2CLIENT, 0xFADE4);
-	static bool* cube = (bool*)helpers::getProcOffset(DLL_D2CLIENT, 0xFADE8);
-
-	static bool applied = true;
-	bool remove = (App.game.screen == GameScreen::InGame && (*cube || *stash || *inventory));
-
-	if (!applied && !remove) {
-		Patch::setBytes(d2common_address, 5, d2common_new_code);
-		Patch::setBytes(d2client_address, 76, d2client_new_code);
-		applied = true;
-	} else if (applied && remove) {
-		Patch::setBytes(d2common_address, 5, d2common_old_code);
-		Patch::setBytes(d2client_address, 76, d2client_old_code);
-		applied = false;
-	}
-}
-
-__declspec(naked) void crossFnPD2()
-{
-	__asm
-	{
-		mov pd2_draw_ui, 0x1
-		call PD2Fn1
-		mov pd2_draw_ui, 0x0
-		ret
-	}
-}
-
-__declspec(naked) void crossFnPD2andFreeRes()
-{
-	__asm
-	{
-		mov pd2_draw_ui, 0x1
-		call PD2Fn1
-		mov pd2_draw_ui, 0x0
-		call FreeResFn1
-		ret
-	}
 }
 
 __declspec(naked) void d2glideFix()
@@ -136,30 +68,12 @@ void applyPD2fixes(int step)
 	if (!App.pd2_fix)
 		return;
 
-	const auto offset = (uintptr_t*)helpers::getProcOffset(DLL_D2CLIENT, 0xC3AA6 + 1);
-
 	if (step == 0) {
-		PD2Fn1 = (uintptr_t*)((uintptr_t)offset + *offset + 4);
-
-		d2common_address = helpers::getProcOffset(DLL_D2COMMON, -10760);
-		Patch::getBytes(d2common_address, 5, &d2common_old_code);
-
 		d2client_address = helpers::getProcOffset(DLL_D2CLIENT, 0x10DFD);
 		Patch::getBytes(d2client_address, 76, &d2client_old_code);
 	} else if (step == 1) {
-		FreeResFn1 = (uintptr_t*)((uintptr_t)offset + *offset + 4);
-
 		if (PD2Fn1 != FreeResFn1) {
-			Patch patch = Patch();
-			patch.add(PatchType::Call, { 0xC3AA6, 0, 0, DLL_D2CLIENT }, 5, (uintptr_t)crossFnPD2andFreeRes);
-			patch.toggle(true);
-
-			Patch::getBytes(d2common_address, 5, &d2common_new_code);
 			Patch::getBytes(d2client_address, 76, &d2client_new_code);
-		} else {
-			Patch patch = Patch();
-			patch.add(PatchType::Call, { 0xC3AA6, 0, 0, DLL_D2CLIENT }, 5, (uintptr_t)crossFnPD2);
-			patch.toggle(true);
 		}
 
 		if (App.api == Api::Glide) {
@@ -169,5 +83,4 @@ void applyPD2fixes(int step)
 		}
 	}
 }
-
 }

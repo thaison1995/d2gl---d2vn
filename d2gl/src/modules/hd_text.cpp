@@ -197,19 +197,6 @@ bool HDText::drawText(const wchar_t* str, int x, int y, uint32_t color, uint32_t
 		}
 	}
 
-	if (pd2_draw_ui) {
-		font = getFont(99);
-		m_fonts[font.id]->setSize(font.size);
-		m_fonts[font.id]->setMetrics(font);
-		m_fonts[font.id]->setStroke(2);
-		if (color == 15)
-			text_color = g_text_colors.at(L'\x30');
-
-		auto size = m_fonts[font.id]->getTextSize(str);
-		pos.x += ((float)m_last_text_width / 2.0f) - size.x / 2.0f;
-		pos.y -= 1.0f;
-	}
-
 	m_fonts[font.id]->setBoxed(false);
 	m_fonts[font.id]->setMasking(m_masking);
 	m_fonts[font.id]->setAlign(centered ? TextAlign::Center : TextAlign::Left);

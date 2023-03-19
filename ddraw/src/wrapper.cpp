@@ -309,8 +309,6 @@ void Wrapper::onBufferSwap(bool flip)
 	option::Menu::instance().draw();
 
 	ctx->presentFrame();
-
-	fixPD2invItemActions();
 }
 
 HRESULT Wrapper::setCooperativeLevel(HWND hwnd, DWORD flags)
