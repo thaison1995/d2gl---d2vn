@@ -66,7 +66,13 @@ void MiniMap::draw()
 			swprintf_s(time_str, L"%.2d:%.2d", gmt_time.tm_hour, gmt_time.tm_min);
 
 			d2::setTextSizeHooked(99);
-			d2::drawNormalTextHooked(time_str, App.game.size.x - 200, 20, 4, 0);
+
+			int y_offset = 20;
+			if (App.mini_map.text_below) {
+				y_offset += 140;
+			}
+
+			d2::drawNormalTextHooked(time_str, App.game.size.x - 200, y_offset, 4, 0);
 		}
 	}
 }

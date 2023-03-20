@@ -192,6 +192,11 @@ bool HDText::drawText(const wchar_t* str, int x, int y, uint32_t color, uint32_t
 			const auto size = m_fonts[font.id]->getTextSize(str);
 			pos.x = App.game.size.x - 12.0f - size.x;
 			pos.y = 9.0f + m_map_text_line * font.size * 1.3f;
+
+			if (App.mini_map.text_below) {
+				pos.y += 140.f;
+			}
+
 			m_map_text_line++;
 		}
 	}

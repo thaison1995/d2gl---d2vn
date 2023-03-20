@@ -222,6 +222,8 @@ void saveIni()
 	  "hd_orbs_centered=%s\n\n"
 	  "; Always on Minimap widget (Only available in glide mode, HD cursor required).\n"
 	  "mini_map=%s\n\n"
+	  "; Minimap Text Below Minimap.\n"
+	  "mini_map_text_below=%s\n\n"
 	  "; D2DX's Motion Prediction.\n"
 	  "motion_prediction=%s\n\n"
 	  "; Skip the Intro videos.\n"
@@ -237,6 +239,7 @@ void saveIni()
 	  boolString(App.hd_orbs.active),
 	  boolString(App.hd_orbs.centered),
 	  boolString(App.mini_map.active),
+	  boolString(App.mini_map.text_below),
 	  boolString(App.motion_prediction),
 	  boolString(App.skip_intro),
 	  boolString(App.no_pickup),
@@ -317,6 +320,7 @@ void loadIni()
 		App.hd_orbs.active = getBool("Feature", "hd_orbs", App.hd_orbs.active);
 		App.hd_orbs.centered = getBool("Feature", "hd_orbs_centered", App.hd_orbs.centered);
 		App.mini_map.active = getBool("Feature", "mini_map", App.mini_map.active) && App.api == Api::Glide;
+		App.mini_map.text_below = getBool("Feature", "mini_map_text_below", App.mini_map.text_below) && App.api == Api::Glide;
 
 		App.motion_prediction = getBool("Feature", "motion_prediction", App.motion_prediction);
 		App.skip_intro = getBool("Feature", "skip_intro", App.skip_intro);

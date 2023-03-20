@@ -339,6 +339,15 @@ void Menu::draw()
 					d2::patch_minimap->toggle(App.mini_map.active);
 					saveBool("Feature", "mini_map", App.mini_map.active);
 				}
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::SameLine(36.0f);
+				ImGui::BeginDisabled(!App.mini_map.active);
+				drawCheckbox_m("Minimap Text Below", App.mini_map.text_below, "", mini_map_text_below)
+				{
+					saveBool("Feature", "mini_map_text_below", App.mini_map.text_below);
+				}
+				ImGui::EndDisabled();
 			ImGui::EndDisabled();
 			childSeparator("##w6");
 			drawCheckbox_m("Motion Prediction", App.motion_prediction, "D2DX's motion prediction feature.", motion_prediction)

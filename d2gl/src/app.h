@@ -135,6 +135,7 @@ struct D2GLApp {
 	struct {
 		bool active = false;
 		bool available = true;
+		bool text_below = true;
 	} mini_map;
 
 	bool show_fps = false;
