@@ -20,7 +20,6 @@
 #include "wrapper.h"
 #include "d2/common.h"
 #include "ddraw/surface.h"
-#include "extra/pd2_fixes.h"
 #include "modules/hd_cursor.h"
 #include "modules/hd_text.h"
 #include "modules/motion_prediction.h"

@@ -19,7 +19,6 @@
 #include "pch.h"
 #include "funcs.h"
 #include "common.h"
-#include "extra/pd2_fixes.h"
 #include "helpers.h"
 #include "modules/hd_text.h"
 #include "modules/motion_prediction.h"

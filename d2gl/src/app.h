@@ -138,7 +138,6 @@ struct D2GLApp {
 	} mini_map;
 
 	bool show_fps = false;
-	bool pd2_fix = false;
 
 	int var1 = 0;
 	int var2 = 0;

@@ -18,7 +18,6 @@
 
 #include "pch.h"
 #include "ini.h"
-#include "extra/pd2_fixes.h"
 #include "helpers.h"
 
 namespace d2gl::option {
@@ -254,17 +253,14 @@ void saveIni()
 	  "; Comma delimitered DLLs to load (early: right after attached).\n"
 	  "load_dlls_early=%s\n\n"
 	  "; Comma delimitered DLLs to load (late: right after window created).\n"
-	  "load_dlls_late=%s\n\n"
-	  "; Apply fix some glide crash with Project Diablo 2.\n"
-	  "pd2_fix=%s\n";
+	  "load_dlls_late=%s\n";
 
 	sprintf_s(buf, other_setting,
 	  App.gl_ver_major,
 	  App.gl_ver_minor,
 	  boolString(App.use_compute_shader),
 	  App.dlls_early.c_str(),
-	  App.dlls_late.c_str(),
-	  boolString(App.pd2_fix));
+	  App.dlls_late.c_str());
 	out_file << buf;
 
 	out_file.close();
@@ -336,11 +332,6 @@ void loadIni()
 
 		App.dlls_early = getString("Other", "load_dlls_early", App.dlls_early);
 		App.dlls_late = getString("Other", "load_dlls_late", App.dlls_late);
-
-		if (isPD2()) {
-			App.pd2_fix = getBool("Other", "pd2_fix", App.pd2_fix);
-			trace_log("Project Diablo 2 Detected.");
-		}
 	}
 
 	// clang-format off

@@ -19,7 +19,6 @@
 #include "pch.h"
 #include "wrapper.h"
 #include "d2/common.h"
-#include "extra/pd2_fixes.h"
 #include "helpers.h"
 #include "modules/hd_cursor.h"
 #include "modules/hd_text.h"

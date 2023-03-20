@@ -20,7 +20,6 @@
 #include "hd_text.h"
 #include "d2/common.h"
 #include "d2/stubs.h"
-#include "extra/pd2_fixes.h"
 #include "font.h"
 
 namespace d2gl::modules {
