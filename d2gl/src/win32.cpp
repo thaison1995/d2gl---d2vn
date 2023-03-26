@@ -117,7 +117,7 @@ COLORREF WINAPI GetPixel(HDC hdc, int x, int y)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (App.ready && option::Menu::instance().isVisible())
+	if (App.ready && Menu::instance().isVisible())
 		ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
 
 	switch (uMsg) {
@@ -137,11 +137,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			App.window.position.y = rect->top;
 			App.window.centered = false;
 
-			if (option::Menu::instance().isVisible()) {
-				auto option = option::Menu::instance().getOption();
-				option->window.position.x = rect->left;
-				option->window.position.y = rect->top;
-				option->window.centered = false;
+			if (Menu::instance().isVisible()) {
+				App.window.position.x = rect->left;
+				App.window.position.y = rect->top;
+				App.window.centered = false;
 			}
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
@@ -191,7 +190,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			BOOL key_state = (lParam & (1 << 30)) != 0;
 
 			if (wParam == VK_RETURN && context_code && !key_state) {
-				if (!option::Menu::instance().isVisible()) {
+				if (!Menu::instance().isVisible()) {
 					App.window.fullscreen = !App.window.fullscreen;
 					if (!App.window.fullscreen)
 						App.window.size = App.window.size_save;
@@ -222,18 +221,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 			} else {
 				if (wParam == 0x4F && GetAsyncKeyState(VK_CONTROL) & 0x8000) {
-					option::Menu::instance().toggle();
+					Menu::instance().toggle();
 
-					if (option::Menu::instance().isVisible())
+					if (Menu::instance().isVisible())
 						setCursorUnlock();
 					else
 						setCursorLock();
 
 					return 0;
 				}
-				if (option::Menu::instance().isVisible()) {
+				if (Menu::instance().isVisible()) {
 					if (wParam == VK_ESCAPE) {
-						option::Menu::instance().toggle();
+						Menu::instance().toggle();
 						setCursorLock();
 						return 0;
 					}
@@ -247,7 +246,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
 		case WM_MBUTTONUP: {
-			if (option::Menu::instance().isVisible())
+			if (Menu::instance().isVisible())
 				return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
 			if (!App.cursor.locked) {
@@ -268,7 +267,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_RBUTTONDOWN:
 		case WM_MBUTTONDOWN:
 		case WM_MOUSEMOVE: {
-			if (option::Menu::instance().isVisible())
+			if (Menu::instance().isVisible())
 				return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
 			if (!App.cursor.locked)
@@ -289,7 +288,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case WM_MOUSEWHEEL: {
-			if (option::Menu::instance().isVisible())
+			if (Menu::instance().isVisible())
 				return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
 			if (!App.cursor.locked)

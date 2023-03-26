@@ -305,7 +305,7 @@ void Wrapper::onBufferSwap(bool flip)
 		ctx->flushVerticesMod();
 	}
 
-	option::Menu::instance().draw();
+	Menu::instance().draw();
 
 	ctx->presentFrame();
 }

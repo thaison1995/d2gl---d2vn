@@ -20,7 +20,7 @@
 
 #include <imgui/imgui.h>
 
-namespace d2gl::option {
+namespace d2gl {
 
 enum class Color {
 	Default,
@@ -29,22 +29,16 @@ enum class Color {
 	Gray,
 };
 
-struct Options {
-	bool vsync = false;
-	D2GLApp::Window window;
-	D2GLApp::ForegroundFPS foreground_fps;
-	D2GLApp::BackgroundFPS background_fps;
-};
-
 class Menu {
 	bool m_visible = false;
 	std::unordered_map<int, ImFont*> m_fonts;
 	std::unordered_map<Color, ImVec4> m_colors;
-	Options m_options;
+	ImGuiCond window_pos_cond;
 
 	Menu();
 	~Menu() = default;
 
+	void applyWindowChanges();
 	bool tabBegin(const char* title, int tab_num, int* active_tab);
 	void tabEnd();
 
@@ -75,7 +69,6 @@ public:
 	void draw();
 
 	inline bool isVisible() { return m_visible; }
-	inline Options* getOption() { return &m_options; }
 };
 
 }

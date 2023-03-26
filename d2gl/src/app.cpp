@@ -19,7 +19,7 @@
 #include "pch.h"
 #include "d2/common.h"
 #include "helpers.h"
-#include "option/ini.h"
+#include "option/config.h"
 #include "win32.h"
 
 namespace d2gl {
@@ -61,6 +61,7 @@ void dllAttach(HMODULE hmodule)
 	std::string command_line = GetCommandLineA();
 	helpers::strToLower(command_line);
 
+
 	if (command_line.find("d2vidtst") != std::string::npos) {
 		App.video_test = true;
 		return;
@@ -87,12 +88,14 @@ void dllAttach(HMODULE hmodule)
 	}
 	trace_log("Game version %s detected.", helpers::getVersionString().c_str());
 
+	App.config = d2gl::Config();
+	App.config.LoadConfig();
+
 	timeBeginPeriod(1);
 	checkCompatibilityMode();
 	checkDPIAwareness();
 	App.hmodule = hmodule;
 
-	option::loadIni();
 	helpers::loadDlls(App.dlls_early);
 
 	d2::initHooks();

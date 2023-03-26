@@ -19,6 +19,7 @@
 #pragma once
 
 #include "graphic/context.h"
+#include "option/config.h"
 #include "types.h"
 
 // #define _DEBUG 1
@@ -38,9 +39,11 @@ struct D2GLApp {
 
 	std::string menu_title = "D2GL";
 	std::string ini_file = "d2gl.ini";
+	std::string yaml_file = "d2gl.yaml";
 	std::string mpq_file = "d2gl.mpq";
 	std::string log_file = "d2gl.log";
 
+	d2gl::Config config;
 	Api api = Api::Glide;
 	std::unique_ptr<Context> context;
 	std::string version = "";
@@ -55,7 +58,7 @@ struct D2GLApp {
 	HWND hwnd = 0;
 	HDC hdc = 0;
 	std::string dlls_early = "";
-	std::string dlls_late = "";
+	std::string dlls_late = "SGD2FreeRes.dll";
 
 	struct Window {
 		DWORD style = 0;
@@ -106,26 +109,26 @@ struct D2GLApp {
 
 	Select<int> shader = {};
 	Select<int> lut = {};
-	bool fxaa = false;
+	bool fxaa = true;
 
 	struct {
-		bool active = false;
-		Range<float> strength = { 1.16f, 0.1f, 3.0f };
-		Range<float> clamp = { 0.15f, 0.0f, 1.0f };
+		bool active = true;
+		Range<float> strength = { 1.20f, 0.1f, 3.0f };
+		Range<float> clamp = { 0.8f, 0.0f, 1.0f };
 		Range<float> radius = { 0.4f, 0.0f, 6.0f };
 	} sharpen;
 
 	struct {
-		bool active = false;
-		Range<float> exposure = { 1.2f, 1.0f, 2.0f };
-		Range<float> gamma = { 1.0f, 0.5f, 1.2f };
+		bool active = true;
+		Range<float> exposure = { 1.0f, 1.0f, 2.0f };
+		Range<float> gamma = { 0.75f, 0.5f, 1.2f };
 	} bloom;
 
-	bool motion_prediction = false;
+	bool motion_prediction = true;
 	bool skip_intro = false;
 	bool no_pickup = false;
-	bool hd_cursor = false;
-	bool hd_text = false;
+	bool hd_cursor = true;
+	bool hd_text = true;
 
 	struct {
 		bool active = false;
@@ -133,9 +136,9 @@ struct D2GLApp {
 	} hd_orbs;
 
 	struct {
-		bool active = false;
+		bool active = true;
 		bool available = true;
-		bool text_below = true;
+		bool text_below = false;
 	} mini_map;
 
 	bool show_fps = false;

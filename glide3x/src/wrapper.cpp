@@ -463,7 +463,7 @@ void Wrapper::onBufferSwap()
 	App.var4 = m_game_texture->getUsage(32);
 	App.var5 = m_game_texture->getUsage(16);
 	App.var6 = m_game_texture->getUsage(8);
-	option::Menu::instance().draw();
+	Menu::instance().draw();
 
 	ctx->presentFrame();
 }
