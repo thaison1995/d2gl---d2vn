@@ -114,15 +114,18 @@ Menu::Menu()
 void Menu::toggle(bool force)
 {
 	m_visible = force ? true : !m_visible;
+
+	if (!m_visible) {
+		App.config.SaveConfig();
+		return;
+	}
 }
 
 void Menu::draw()
 {
 	if (!m_visible) {
-		App.config.SaveConfig();
 		return;
 	}
-
 	App.context->imguiStartFrame();
 
 #ifdef _DEBUG
@@ -148,8 +151,8 @@ void Menu::draw()
 	ImVec2 window_pos = { (float)App.window.size.x * 0.5f, (float)App.window.size.y * 0.5f };
 	ImVec2 max_size = { (float)App.window.size.x - 20.0f, (float)App.window.size.y - 20.0f };
 	static ImGuiWindowFlags window_flags =
-	  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
-	  ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	window_pos_cond = ImGuiCond_Appearing;
 
 	ImGui::SetNextWindowSize({ 640.0f, 500.0f }, ImGuiCond_Always);
@@ -181,23 +184,23 @@ void Menu::draw()
 			}
 			drawSeparator();
 			ImGui::BeginDisabled(App.window.fullscreen);
-				drawCombo_m("Window Size", App.resolutions, "Select window size.", "", resolutions)
-				{
-					Menu::applyWindowChanges();
-				}
-				ImGui::Dummy({ 0.0f, 6.0f });
-				ImGui::BeginDisabled(App.resolutions.selected);
-					drawInput2("##ws", "Input custom width & height. (min: 800 x 600)", (glm::ivec2*)(&App.window.size_save), { 800, 600 }, App.desktop_resolution);
-				ImGui::EndDisabled();
-				drawSeparator();
-				drawCheckbox_m("Centered Window", App.window.centered, "Make window centered to desktop screen.", centered_window)
-				{
-					Menu::applyWindowChanges();
-				}
-				ImGui::Dummy({ 0.0f, 6.0f });
-				ImGui::BeginDisabled(App.window.centered);
-					drawInput2("##wp", "Window position from top left corner.", &App.window.position, { 0, 0 }, App.desktop_resolution);
-				ImGui::EndDisabled();
+			drawCombo_m("Window Size", App.resolutions, "Select window size.", "", resolutions)
+			{
+				Menu::applyWindowChanges();
+			}
+			ImGui::Dummy({ 0.0f, 6.0f });
+			ImGui::BeginDisabled(App.resolutions.selected);
+			drawInput2("##ws", "Input custom width & height. (min: 800 x 600)", (glm::ivec2*)(&App.window.size_save), { 800, 600 }, App.desktop_resolution);
+			ImGui::EndDisabled();
+			drawSeparator();
+			drawCheckbox_m("Centered Window", App.window.centered, "Make window centered to desktop screen.", centered_window)
+			{
+				Menu::applyWindowChanges();
+			}
+			ImGui::Dummy({ 0.0f, 6.0f });
+			ImGui::BeginDisabled(App.window.centered);
+			drawInput2("##wp", "Window position from top left corner.", &App.window.position, { 0, 0 }, App.desktop_resolution);
+			ImGui::EndDisabled();
 			ImGui::EndDisabled();
 			childSeparator("##w2", true);
 			drawCheckbox_m("V-Sync", App.vsync, "Vertical Synchronization.", vsync)
@@ -218,11 +221,11 @@ void Menu::draw()
 			drawSeparator();
 			drawCheckbox_m("Max Background FPS", App.background_fps.active, "", background_fps);
 			ImGui::BeginDisabled(!App.background_fps.active);
-				drawSlider_m(int, "", App.background_fps.range, "%d", "Max fps when game window is in inactive.", background_fps_val);
+			drawSlider_m(int, "", App.background_fps.range, "%d", "Max fps when game window is in inactive.", background_fps_val);
 			ImGui::EndDisabled();
 			drawSeparator();
 			ImGui::BeginDisabled(App.window.fullscreen);
-				drawCheckbox_m("Dark Mode", App.window.dark_mode, "Dark window title bar. Affect on next launch.", dark_mode);
+			drawCheckbox_m("Dark Mode", App.window.dark_mode, "Dark window title bar. Affect on next launch.", dark_mode);
 			ImGui::EndDisabled();
 			childEnd();
 			tabEnd();
@@ -233,26 +236,26 @@ void Menu::draw()
 			drawSeparator();
 			drawCheckbox_m("Luma Sharpen", App.sharpen.active, "", sharpen);
 			ImGui::BeginDisabled(!App.sharpen.active);
-				drawSlider_m(float, "", App.sharpen.strength, "%.3f", "", sharpen_strength);
-				drawDescription("Strength of the sharpening.", m_colors[Color::Gray], 12);
-				drawSlider_m(float, "", App.sharpen.clamp, "%.3f", "", sharpen_clamp);
-				drawDescription("Limit maximum amount of sharpening pixel.", m_colors[Color::Gray], 12);
-				drawSlider_m(float, "", App.sharpen.radius, "%.3f", "", sharpen_radius);
-				drawDescription("Radius of the sampling pattern.", m_colors[Color::Gray], 12);
+			drawSlider_m(float, "", App.sharpen.strength, "%.3f", "", sharpen_strength);
+			drawDescription("Strength of the sharpening.", m_colors[Color::Gray], 12);
+			drawSlider_m(float, "", App.sharpen.clamp, "%.3f", "", sharpen_clamp);
+			drawDescription("Limit maximum amount of sharpening pixel.", m_colors[Color::Gray], 12);
+			drawSlider_m(float, "", App.sharpen.radius, "%.3f", "", sharpen_radius);
+			drawDescription("Radius of the sampling pattern.", m_colors[Color::Gray], 12);
 			ImGui::EndDisabled();
 			drawSeparator();
 			drawCheckbox_m("FXAA", App.fxaa, "Fast approximate anti-aliasing.", fxaa);
 			childSeparator("##w4");
 			ImGui::BeginDisabled(App.api != Api::Glide);
-				drawCombo_m("Color Grading", App.lut, "Lookup table (LUT).", "", lut);
-				drawSeparator();
-				drawCheckbox_m("Bloom Effect", App.bloom.active, "", bloom);
-				ImGui::BeginDisabled(!App.bloom.active);
-					drawSlider_m(float, "", App.bloom.exposure, "%.3f", "", bloom_exposure);
-					drawDescription("Bloom exposure setting.", m_colors[Color::Gray], 12);
-					drawSlider_m(float, "", App.bloom.gamma, "%.3f", "", bloom_gamma);
-					drawDescription("Bloom Gamma setting.", m_colors[Color::Gray], 12);
-				ImGui::EndDisabled();
+			drawCombo_m("Color Grading", App.lut, "Lookup table (LUT).", "", lut);
+			drawSeparator();
+			drawCheckbox_m("Bloom Effect", App.bloom.active, "", bloom);
+			ImGui::BeginDisabled(!App.bloom.active);
+			drawSlider_m(float, "", App.bloom.exposure, "%.3f", "", bloom_exposure);
+			drawDescription("Bloom exposure setting.", m_colors[Color::Gray], 12);
+			drawSlider_m(float, "", App.bloom.gamma, "%.3f", "", bloom_gamma);
+			drawDescription("Bloom Gamma setting.", m_colors[Color::Gray], 12);
+			ImGui::EndDisabled();
 			ImGui::EndDisabled();
 			childEnd();
 			tabEnd();
@@ -275,33 +278,33 @@ void Menu::draw()
 			}
 			drawSeparator();
 			ImGui::BeginDisabled(!App.hd_cursor);
-				drawCheckbox_m("HD Text", App.hd_text, "High-definition ingame texts.", hd_text)
-				{
-					d2::patch_hd_text->toggle(App.hd_text);
-				}
-				drawSeparator();
-				ImGui::BeginDisabled(true);
-					drawCheckbox_m("HD Orbs", App.hd_orbs.active, "High-definition life & mana orbs. (coming soon)", hd_orbs);
-					ImGui::Spacing();
-					ImGui::Spacing();
-					ImGui::SameLine(36.0f);
-					ImGui::BeginDisabled(!App.hd_orbs.active);
-						drawCheckbox_m("Centered", App.hd_orbs.centered, "", hd_orbs_centered);
-					ImGui::EndDisabled();
-				ImGui::EndDisabled();
+			drawCheckbox_m("HD Text", App.hd_text, "High-definition ingame texts.", hd_text)
+			{
+				d2::patch_hd_text->toggle(App.hd_text);
+			}
+			drawSeparator();
+			ImGui::BeginDisabled(true);
+			drawCheckbox_m("HD Orbs", App.hd_orbs.active, "High-definition life & mana orbs. (coming soon)", hd_orbs);
+			ImGui::Spacing();
+			ImGui::Spacing();
+			ImGui::SameLine(36.0f);
+			ImGui::BeginDisabled(!App.hd_orbs.active);
+			drawCheckbox_m("Centered", App.hd_orbs.centered, "", hd_orbs_centered);
+			ImGui::EndDisabled();
+			ImGui::EndDisabled();
 			ImGui::EndDisabled();
 			drawSeparator();
 			ImGui::BeginDisabled(App.api != Api::Glide || !App.hd_cursor || !App.mini_map.available);
-				drawCheckbox_m("Mini Map", App.mini_map.active, "Always on Minimap widget.", mini_map)
-				{
-					d2::patch_minimap->toggle(App.mini_map.active);
-				}
-				ImGui::Spacing();
-				ImGui::Spacing();
-				ImGui::SameLine(36.0f);
-				ImGui::BeginDisabled(!App.mini_map.active);
-				drawCheckbox_m("Minimap Text Below", App.mini_map.text_below, "", mini_map_text_below);
-				ImGui::EndDisabled();
+			drawCheckbox_m("Mini Map", App.mini_map.active, "Always on Minimap widget.", mini_map)
+			{
+				d2::patch_minimap->toggle(App.mini_map.active);
+			}
+			ImGui::Spacing();
+			ImGui::Spacing();
+			ImGui::SameLine(36.0f);
+			ImGui::BeginDisabled(!App.mini_map.active);
+			drawCheckbox_m("Minimap Text Below", App.mini_map.text_below, "", mini_map_text_below);
+			ImGui::EndDisabled();
 			ImGui::EndDisabled();
 			childSeparator("##w6");
 			drawCheckbox_m("Motion Prediction", App.motion_prediction, "D2DX's motion prediction feature.", motion_prediction)

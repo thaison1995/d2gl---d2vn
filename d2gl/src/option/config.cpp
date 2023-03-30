@@ -101,6 +101,8 @@ void Config::SaveConfig()
 
 	std::ofstream fout(App.yaml_file);
 	fout << yaml;
+
+	fout.close();
 }
 
 void Config::LoadConfig()
