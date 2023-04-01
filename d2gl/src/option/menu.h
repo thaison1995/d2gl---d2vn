@@ -31,6 +31,7 @@ enum class Color {
 
 class Menu {
 	bool m_visible = false;
+	bool m_visible_t = false;
 	std::unordered_map<int, ImFont*> m_fonts;
 	std::unordered_map<Color, ImVec4> m_colors;
 	ImGuiCond window_pos_cond;

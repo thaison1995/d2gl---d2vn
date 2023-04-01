@@ -114,15 +114,18 @@ Menu::Menu()
 void Menu::toggle(bool force)
 {
 	m_visible = force ? true : !m_visible;
-
-	if (!m_visible) {
-		App.config.SaveConfig();
-		return;
-	}
 }
 
 void Menu::draw()
 {
+	// Update the config always on exit
+	if (m_visible != m_visible_t) {
+		if (!m_visible) {
+			App.config.SaveConfig();
+		}
+		m_visible_t = m_visible;
+	}
+
 	if (!m_visible) {
 		return;
 	}
@@ -151,8 +154,8 @@ void Menu::draw()
 	ImVec2 window_pos = { (float)App.window.size.x * 0.5f, (float)App.window.size.y * 0.5f };
 	ImVec2 max_size = { (float)App.window.size.x - 20.0f, (float)App.window.size.y - 20.0f };
 	static ImGuiWindowFlags window_flags =
-		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
-		ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
+	  ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	window_pos_cond = ImGuiCond_Appearing;
 
 	ImGui::SetNextWindowSize({ 640.0f, 500.0f }, ImGuiCond_Always);
