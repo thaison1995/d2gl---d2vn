@@ -67,8 +67,8 @@ void Config::SaveConfig()
 	yaml["window_dark_mode"] = App.window.dark_mode;
 	yaml["window_vsync"] = App.vsync;
 	yaml["window_centered"] = App.window.centered;
-	yaml["App.window.position.x"] = App.window.position.x;
-	yaml["App.window.position.y"] = App.window.position.y;
+	yaml["window_position_x"] = App.window.position.x;
+	yaml["window_position_y"] = App.window.position.y;
 	yaml["foreground_fps_active"] = App.foreground_fps.active;
 	yaml["foreground_fps_value"] = App.foreground_fps.range.value;
 	yaml["background_fps_active"] = App.background_fps.active;
