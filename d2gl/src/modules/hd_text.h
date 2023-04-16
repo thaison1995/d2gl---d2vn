@@ -63,6 +63,11 @@ class HDText {
 	clock_t m_entry_timer = 0;
 	int m_cur_level_no = 0;
 
+	uint32_t m_hovered_player_id = 0;
+	uint32_t m_hovered_player_hp1 = 0;
+	uint32_t m_hovered_player_hp2 = 0;
+	glm::ivec2 m_hovered_player_pos = { 0, 0 };
+
 	const uint32_t m_bg_color = 0x000000CC;
 	const uint32_t m_border_color = 0x222222DD;
 	const uint32_t m_alt_bg_color = 0x00000099;
@@ -109,6 +114,7 @@ public:
 
 private:
 	void drawMonsterHealthBar(d2::UnitAny* unit);
+	void drawPlayerHealthBar(const wchar_t* name, uint32_t color);
 
 	inline wchar_t getColor(uint32_t color);
 	inline const D2FontInfo& getFont(uint32_t size);

@@ -21,6 +21,7 @@
 #include "d2/common.h"
 #include "d2/stubs.h"
 #include "font.h"
+#include "modules/motion_prediction.h"
 
 namespace d2gl::modules {
 
@@ -221,9 +222,16 @@ bool HDText::drawFramedText(const wchar_t* str, int x, int y, uint32_t color, ui
 		return false;
 
 	const auto unit = d2::getSelectedUnit();
-	if (isVerMin(V_111) && unit && unit->dwType == d2::UnitType::Monster && y == 32 && !centered) {
-		drawMonsterHealthBar(unit);
-		return true;
+	if (unit) {
+		if (unit->dwType == d2::UnitType::Monster && isVerMin(V_111) && y == 32 && !centered) {
+			drawMonsterHealthBar(unit);
+			return true;
+		}
+
+		if (unit->dwType == d2::UnitType::Player || d2::isMercUnit(unit)) {
+			m_hovered_player_id = d2::getUnitID(unit) | ((uint8_t)unit->dwType << 24);
+			return false;
+		}
 	}
 
 	auto font = getFont(1);
@@ -384,11 +392,20 @@ bool HDText::drawSolidRect(int left, int top, int right, int bottom, uint32_t co
 		monster_hp = false;
 	}
 
-	if (color != 0)
-		return false;
-
 	const int width = right - left;
 	const int height = bottom - top;
+
+	if (height == 16 && m_hovered_player_id && m_text_size == 1) {
+		if (m_hovered_player_hp1 == 0) {
+			m_hovered_player_hp1 = width;
+			m_hovered_player_pos = { left, top };
+		} else
+			m_hovered_player_hp2 = width;
+		return true;
+	}
+
+	if (color != 0)
+		return false;
 
 	if (draw_mode == 5 && height == 5 && top == 14) // hireling & summon hp
 		return false;
@@ -501,6 +518,12 @@ void HDText::drawSubText(uint8_t fn)
 		length = (int*)(ptr - 0xC);
 		x = (int*)(ptr - 0x14);
 		y = (int*)(ptr + 0x8);
+	}
+
+	if (m_hovered_player_id) {
+		drawPlayerHealthBar(str, *color);
+		*length = 0;
+		return;
 	}
 
 	if (str) {
@@ -758,6 +781,49 @@ void HDText::drawMonsterHealthBar(d2::UnitAny* unit)
 
 	glm::vec2 text_pos = { center - text_size.x / 2, App.api == Api::Glide ? 33.2f : 32.5f };
 	m_fonts[font.id]->drawText(name, text_pos, g_text_colors.at(text_color));
+}
+
+void HDText::drawPlayerHealthBar(const wchar_t* name, uint32_t color)
+{
+	const uint32_t hp = m_hovered_player_hp1;
+	const uint32_t max_hp = m_hovered_player_hp1 + m_hovered_player_hp2;
+
+	auto font = getFont(1);
+	m_fonts[font.id]->setSize(font.size);
+	m_fonts[font.id]->setMetrics(font);
+	m_fonts[font.id]->setBoxed(false);
+	m_fonts[font.id]->setMasking(false);
+	m_fonts[font.id]->setAlign(TextAlign::Center);
+
+	const auto text_size = m_fonts[font.id]->getTextSize(name);
+	float hp_percent = (float)hp / (float)max_hp;
+
+	glm::vec2 bar_size = { 60.0f, 16.0f };
+	if (text_size.x + 20.0f > bar_size.x)
+		bar_size.x = text_size.x + 20.0f;
+
+	auto offset = modules::MotionPrediction::Instance().getUnitOffset(m_hovered_player_id);
+	const float center = (float)(m_hovered_player_pos.x + max_hp / 2) + (float)offset.x;
+	glm::vec2 bar_pos = { center - bar_size.x / 2, (float)m_hovered_player_pos.y + (float)offset.y };
+
+	m_object_bg->setFlags({ 2, 0, 0, 0 });
+	m_object_bg->setPosition(bar_pos);
+	m_object_bg->setSize({ bar_size.x * hp_percent, bar_size.y });
+	m_object_bg->setColor(m_monster_hp, 1);
+	App.context->pushObject(m_object_bg);
+
+	if (hp_percent < 1.0f) {
+		m_object_bg->setPosition({ bar_pos.x + bar_size.x * hp_percent, bar_pos.y });
+		m_object_bg->setSize({ bar_size.x * (1.0f - hp_percent), bar_size.y });
+		m_object_bg->setColor(m_bg_color, 1);
+		App.context->pushObject(m_object_bg);
+	}
+
+	glm::vec2 text_pos = { center - text_size.x / 2, bar_pos.y + (App.api == Api::Glide ? 14.4f : 13.8f) };
+	m_fonts[font.id]->drawText(name, text_pos, g_text_colors.at(getColor(color)));
+
+	m_hovered_player_id = 0;
+	m_hovered_player_hp1 = m_hovered_player_hp2 = 0;
 }
 
 inline const D2FontInfo& HDText::getFont(uint32_t size)

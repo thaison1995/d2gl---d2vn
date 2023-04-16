@@ -30,6 +30,11 @@ enum class UnitType {
 	Count,
 };
 
+#define MERC_A1 0x010f
+#define MERC_A2 0x0152
+#define MERC_A3 0x0167
+#define MERC_A5 0x0231
+
 enum class ItemQuality {
 	None,
 	Inferior,

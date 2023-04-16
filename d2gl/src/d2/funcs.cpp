@@ -137,6 +137,14 @@ ItemQuality getItemQuality(UnitAny* unit)
 	return isVer(V_109d) ? unit->v109.pItemData->dwQuality : unit->v110.pItemData->dwQuality;
 }
 
+bool isMercUnit(UnitAny* unit)
+{
+	if (unit->dwType != d2::UnitType::Monster || isVer(V_109d))
+		return false;
+
+	return unit->v110.dwClassId == MERC_A1 || unit->v110.dwClassId == MERC_A2 || unit->v110.dwClassId == MERC_A3 || unit->v110.dwClassId == MERC_A5;
+}
+
 CellFile* getCellFile(CellContext* cell)
 {
 	if (isVerMin(V_113c))

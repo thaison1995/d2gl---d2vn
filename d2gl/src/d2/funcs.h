@@ -39,6 +39,7 @@ bool isUnitDead(UnitAny* unit);
 MonsterType getMonsterType(UnitAny* unit);
 wchar_t* getMonsterName(UnitAny* unit);
 ItemQuality getItemQuality(UnitAny* unit);
+bool isMercUnit(UnitAny* unit);
 
 CellFile* getCellFile(CellContext* cell);
 DWORD getCellNo(CellContext* cell);
