@@ -368,7 +368,7 @@ bool HDText::drawRectangledText(const wchar_t* str, int x, int y, uint32_t rect_
 
 bool HDText::drawSolidRect(int left, int top, int right, int bottom, uint32_t color, int draw_mode)
 {
-	if (!isActive())
+	if (App.game.screen != GameScreen::InGame || !isActive())
 		return false;
 
 	if (isVerMax(V_110)) {
