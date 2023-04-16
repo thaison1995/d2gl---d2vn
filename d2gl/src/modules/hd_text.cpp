@@ -203,7 +203,7 @@ bool HDText::drawText(const wchar_t* str, int x, int y, uint32_t color, uint32_t
 
 	m_fonts[font.id]->setBoxed(false);
 	m_fonts[font.id]->setMasking(m_masking);
-	m_fonts[font.id]->setAlign(centered ? TextAlign::Center : TextAlign::Left);
+	m_fonts[font.id]->setAlign(TextAlign::Left);
 	m_fonts[font.id]->drawText(str, pos, text_color);
 	m_fonts[font.id]->setStroke(0);
 
