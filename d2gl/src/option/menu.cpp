@@ -154,8 +154,8 @@ void Menu::draw()
 	ImVec2 window_pos = { (float)App.window.size.x * 0.5f, (float)App.window.size.y * 0.5f };
 	ImVec2 max_size = { (float)App.window.size.x - 20.0f, (float)App.window.size.y - 20.0f };
 	static ImGuiWindowFlags window_flags =
-	  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
-	  ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	window_pos_cond = ImGuiCond_Appearing;
 
 	ImGui::SetNextWindowSize({ 640.0f, 500.0f }, ImGuiCond_Always);
@@ -286,6 +286,7 @@ void Menu::draw()
 				d2::patch_hd_text->toggle(App.hd_text);
 			}
 			drawSeparator();
+			/*
 			ImGui::BeginDisabled(true);
 			drawCheckbox_m("HD Orbs", App.hd_orbs.active, "High-definition life & mana orbs. (coming soon)", hd_orbs);
 			ImGui::Spacing();
@@ -295,8 +296,9 @@ void Menu::draw()
 			drawCheckbox_m("Centered", App.hd_orbs.centered, "", hd_orbs_centered);
 			ImGui::EndDisabled();
 			ImGui::EndDisabled();
-			ImGui::EndDisabled();
 			drawSeparator();
+			*/
+			ImGui::EndDisabled();
 			ImGui::BeginDisabled(App.api != Api::Glide || !App.hd_cursor || !App.mini_map.available);
 			drawCheckbox_m("Mini Map", App.mini_map.active, "Always on Minimap widget.", mini_map)
 			{

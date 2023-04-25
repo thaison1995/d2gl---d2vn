@@ -292,73 +292,73 @@ void Wrapper::onStageChange()
 		return;
 
 	switch (App.game.draw_stage) {
-		case DrawStage::World:
-			break;
-		case DrawStage::UI:
-			if (App.bloom.active || App.lut.selected) {
-				m_prefx_texture->fillFromBuffer(m_game_framebuffer);
-				ctx->bindPipeline(m_prefx_pipeline);
+	case DrawStage::World:
+		break;
+	case DrawStage::UI:
+		if (App.bloom.active || App.lut.selected) {
+			m_prefx_texture->fillFromBuffer(m_game_framebuffer);
+			ctx->bindPipeline(m_prefx_pipeline);
 
-				if (App.bloom.active) {
-					ctx->bindFrameBuffer(m_bloom_framebuffer, false);
-					ctx->setViewport(m_bloom_tex_size);
-					ctx->pushQuad(0);
+			if (App.bloom.active) {
+				ctx->bindFrameBuffer(m_bloom_framebuffer, false);
+				ctx->setViewport(m_bloom_tex_size);
+				ctx->pushQuad(0);
 
-					if (App.gl_caps.compute_shader) {
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						m_blur_compute_pipeline->dispatchCompute(0, m_bloom_work_size, GL_PIXEL_BUFFER_BARRIER_BIT);
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						m_blur_compute_pipeline->dispatchCompute(1, m_bloom_work_size, GL_PIXEL_BUFFER_BARRIER_BIT);
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						m_blur_compute_pipeline->dispatchCompute(0, m_bloom_work_size, GL_PIXEL_BUFFER_BARRIER_BIT);
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						m_blur_compute_pipeline->dispatchCompute(1, m_bloom_work_size, GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-					} else {
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						ctx->pushQuad(1);
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						ctx->pushQuad(2);
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						ctx->pushQuad(1);
-						m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
-						ctx->pushQuad(2);
-					}
-
-					ctx->bindFrameBuffer(m_game_framebuffer, false);
-					ctx->setViewport(App.game.size);
-					ctx->bindPipeline(m_prefx_pipeline);
+				if (App.gl_caps.compute_shader) {
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					m_blur_compute_pipeline->dispatchCompute(0, m_bloom_work_size, GL_PIXEL_BUFFER_BARRIER_BIT);
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					m_blur_compute_pipeline->dispatchCompute(1, m_bloom_work_size, GL_PIXEL_BUFFER_BARRIER_BIT);
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					m_blur_compute_pipeline->dispatchCompute(0, m_bloom_work_size, GL_PIXEL_BUFFER_BARRIER_BIT);
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					m_blur_compute_pipeline->dispatchCompute(1, m_bloom_work_size, GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+				} else {
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					ctx->pushQuad(1);
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					ctx->pushQuad(2);
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					ctx->pushQuad(1);
+					m_bloom_texture->fillFromBuffer(m_bloom_framebuffer);
+					ctx->pushQuad(2);
 				}
-				ctx->pushQuad(3, App.lut.selected, App.bloom.active);
 
-				ctx->bindPipeline(m_game_pipeline, m_current_blend_index);
+				ctx->bindFrameBuffer(m_game_framebuffer, false);
+				ctx->setViewport(App.game.size);
+				ctx->bindPipeline(m_prefx_pipeline);
 			}
-			break;
-		case DrawStage::Map:
-			if (App.mini_map.active && App.hd_cursor) {
-				ctx->flushVertices();
+			ctx->pushQuad(3, App.lut.selected, App.bloom.active);
 
-				m_blend_locked = true;
-				ctx->bindPipeline(m_game_pipeline, 3);
-				ctx->setVertexFlagW(1 + !*d2::automap_on);
-			}
-			break;
-		case DrawStage::HUD:
-			if (App.mini_map.active && App.hd_cursor) {
-				ctx->flushVertices();
+			ctx->bindPipeline(m_game_pipeline, m_current_blend_index);
+		}
+		break;
+	case DrawStage::Map:
+		if (App.mini_map.active && App.hd_cursor) {
+			ctx->flushVertices();
 
-				m_blend_locked = false;
-				ctx->bindPipeline(m_game_pipeline, m_current_blend_index);
-				ctx->setVertexFlagW(0);
+			m_blend_locked = true;
+			ctx->bindPipeline(m_game_pipeline, 3);
+			ctx->setVertexFlagW(1 + !*d2::automap_on);
+		}
+		break;
+	case DrawStage::HUD:
+		if (App.mini_map.active && App.hd_cursor) {
+			ctx->flushVertices();
 
-				modules::MiniMap::Instance().draw();
-			}
-			modules::HDText::Instance().drawFpsCounter();
-			break;
-		case DrawStage::Cursor:
-			ctx->appendDelayedObjects();
-			modules::HDText::Instance().drawEntryText();
-			modules::HDCursor::Instance().draw();
-			break;
+			m_blend_locked = false;
+			ctx->bindPipeline(m_game_pipeline, m_current_blend_index);
+			ctx->setVertexFlagW(0);
+
+			modules::MiniMap::Instance().draw();
+		}
+		modules::HDText::Instance().drawFpsCounter();
+		break;
+	case DrawStage::Cursor:
+		ctx->appendDelayedObjects();
+		modules::HDText::Instance().drawEntryText();
+		modules::HDCursor::Instance().draw();
+		break;
 	}
 }
 
@@ -706,15 +706,15 @@ GrContext_t Wrapper::grSstWinOpen(FxU32 hwnd, GrScreenResolution_t screen_resolu
 FxU32 Wrapper::grGet(FxU32 pname, FxI32& params)
 {
 	switch (pname) {
-		case GR_MAX_TEXTURE_SIZE: params = 256; break;
-		case GR_MAX_TEXTURE_ASPECT_RATIO: params = 3; break;
-		case GR_TEXTURE_ALIGN: params = 256; break;
-		case GR_NUM_BOARDS: params = 1; break;
-		case GR_NUM_FB: params = 1; break;
-		case GR_NUM_TMU: params = GLIDE_MAX_NUM_TMU; break;
-		case GR_MEMORY_UMA: params = 0; break;
-		case GR_GAMMA_TABLE_ENTRIES: params = 256; break;
-		case GR_BITS_GAMMA: params = 8; break;
+	case GR_MAX_TEXTURE_SIZE: params = 256; break;
+	case GR_MAX_TEXTURE_ASPECT_RATIO: params = 3; break;
+	case GR_TEXTURE_ALIGN: params = 256; break;
+	case GR_NUM_BOARDS: params = 1; break;
+	case GR_NUM_FB: params = 1; break;
+	case GR_NUM_TMU: params = GLIDE_MAX_NUM_TMU; break;
+	case GR_MEMORY_UMA: params = 0; break;
+	case GR_GAMMA_TABLE_ENTRIES: params = 256; break;
+	case GR_BITS_GAMMA: params = 8; break;
 	}
 	return 4;
 }
@@ -722,11 +722,11 @@ FxU32 Wrapper::grGet(FxU32 pname, FxI32& params)
 const char* Wrapper::grGetString(FxU32 pname)
 {
 	switch (pname) {
-		case GR_EXTENSION: return " ";
-		case GR_HARDWARE: return "Spectre 3000";
-		case GR_RENDERER: return "D2GL";
-		case GR_VENDOR: return "3Dfx Interactive";
-		case GR_VERSION: return "3.1";
+	case GR_EXTENSION: return " ";
+	case GR_HARDWARE: return "Spectre 3000";
+	case GR_RENDERER: return "D2GL";
+	case GR_VENDOR: return "3Dfx Interactive";
+	case GR_VERSION: return "3.1";
 	}
 	return "";
 }
