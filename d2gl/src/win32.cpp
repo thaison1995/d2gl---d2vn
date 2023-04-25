@@ -425,7 +425,9 @@ void windowResize()
 
 void toggleDarkmode()
 {
-	static SetWindowCompositionAttribute_t SetWindowCompositionAttribute = (SetWindowCompositionAttribute_t)helpers::getProcOffset(DLL_USER32, "SetWindowCompositionAttribute");
+	typedef BOOL(WINAPI* SetWindowCompositionAttribute_t)(HWND hWnd, WINDCOMPATTRDATA*);
+	SetWindowCompositionAttribute_t SetWindowCompositionAttribute = (SetWindowCompositionAttribute_t)helpers::getProcOffset(DLL_USER32, "SetWindowCompositionAttribute");
+
 	if (SetWindowCompositionAttribute) {
 		BOOL dark = (BOOL)App.window.dark_mode;
 		WINDCOMPATTRDATA data = { WINDCOMPATTR::WCA_USEDARKMODECOLORS, &dark, sizeof(dark) };
@@ -435,6 +437,37 @@ void toggleDarkmode()
 		if (App.window.dark_mode)
 			trace_log("Dark mode is not available!");
 	}
+}
+
+void setDPIAwareness()
+{
+	auto info = getOSVersion();
+	trace_log("Windows version %d.%d (build: %d) detected.", info.dwMajorVersion, info.dwMinorVersion, info.dwBuildNumber);
+
+	if (info.dwMajorVersion >= HIBYTE(_WIN32_WINNT_WIN10)) { // Win10+
+		typedef BOOL(WINAPI* SetProcessDpiAwareness_t)(DPI_AWARENESS_CONTEXT);
+		SetProcessDpiAwareness_t SetProcessDpiAwareness = (SetProcessDpiAwareness_t)helpers::getProcOffset(DLL_USER32, "SetProcessDpiAwarenessContext");
+		SetProcessDpiAwareness(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	} else if (info.dwMajorVersion == HIBYTE(_WIN32_WINNT_WINBLUE) && info.dwMinorVersion == LOBYTE(_WIN32_WINNT_WINBLUE)) { // Win8.1
+		typedef HRESULT(WINAPI* SetProcessDpiAwareness_t)(PROCESS_DPI_AWARENESS);
+		SetProcessDpiAwareness_t SetProcessDpiAwareness = (SetProcessDpiAwareness_t)helpers::getProcOffset(DLL_SHCORE, "SetProcessDpiAwareness");
+		SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
+	} else
+		SetProcessDPIAware();
+}
+
+RTL_OSVERSIONINFOW getOSVersion()
+{
+	typedef LONG NTSTATUS, *PNTSTATUS;
+	typedef NTSTATUS (WINAPI* RtlGetVersion_t)(PRTL_OSVERSIONINFOW);
+	static RtlGetVersion_t RtlGetVersion = (RtlGetVersion_t)helpers::getProcOffset(DLL_NTDLL, "RtlGetVersion");
+
+	RTL_OSVERSIONINFOW info = { 0 };
+	info.dwOSVersionInfoSize = sizeof(info);
+	if (RtlGetVersion)
+		RtlGetVersion(&info);
+
+	return info;
 }
 
 }

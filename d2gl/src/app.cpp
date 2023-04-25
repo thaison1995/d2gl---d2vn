@@ -45,17 +45,6 @@ void checkCompatibilityMode()
 	}
 }
 
-void checkDPIAwareness()
-{
-	bool setDpiAware = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-	if (!setDpiAware) {
-		HRESULT result = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-		setDpiAware = result == S_OK || result == E_ACCESSDENIED;
-	}
-	if (!setDpiAware)
-		SetProcessDPIAware();
-}
-
 void dllAttach(HMODULE hmodule)
 {
 	std::string command_line = GetCommandLineA();
@@ -93,7 +82,7 @@ void dllAttach(HMODULE hmodule)
 
 	timeBeginPeriod(1);
 	checkCompatibilityMode();
-	checkDPIAwareness();
+	win32::setDPIAwareness();
 	App.hmodule = hmodule;
 
 	helpers::loadDlls(App.dlls_early);
