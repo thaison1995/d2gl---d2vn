@@ -82,7 +82,7 @@ HRESULT __stdcall DirectDraw::CreateSurface(LPDDSURFACEDESC surface_desc, LPDIRE
 
 HRESULT __stdcall DirectDraw::EnumDisplayModes(DWORD flags, LPDDSURFACEDESC surface_desc, LPVOID context, LPDDENUMMODESCALLBACK enum_modes_callback)
 {
-	std::vector<std::pair<DWORD, DWORD>> resolutions = { { 640, 480 }, { 800, 600 } };
+	std::vector<std::pair<DWORD, DWORD>> resolutions = { { 800, 600 }, { 1068, 600} };
 
 	for (auto& res : resolutions) {
 		DDSURFACEDESC desc = { 0 };

@@ -198,20 +198,20 @@ void Wrapper::onStageChange()
 		return;
 
 	switch (App.game.draw_stage) {
-		case DrawStage::World:
-			break;
-		case DrawStage::UI:
-			break;
-		case DrawStage::Map:
-			break;
-		case DrawStage::HUD:
-			modules::HDText::Instance().drawFpsCounter();
-			break;
-		case DrawStage::Cursor:
-			ctx->appendDelayedObjects();
-			modules::HDText::Instance().drawEntryText();
-			modules::HDCursor::Instance().draw();
-			break;
+	case DrawStage::World:
+		break;
+	case DrawStage::UI:
+		break;
+	case DrawStage::Map:
+		break;
+	case DrawStage::HUD:
+		modules::HDText::Instance().drawFpsCounter();
+		break;
+	case DrawStage::Cursor:
+		ctx->appendDelayedObjects();
+		modules::HDText::Instance().drawEntryText();
+		modules::HDCursor::Instance().draw();
+		break;
 	}
 }
 
@@ -339,6 +339,10 @@ HRESULT Wrapper::setDisplayMode(DWORD width, DWORD height, DWORD bpp)
 
 	if (bpp != 8)
 		App.game.screen = GameScreen::Movie;
+
+	if (width <= 0 || height <= 0) {
+		return DD_OK;
+	}
 
 	App.game.bpp = bpp;
 	App.game.size = { width, height };
