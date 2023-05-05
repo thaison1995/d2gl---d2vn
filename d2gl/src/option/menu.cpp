@@ -129,7 +129,10 @@ void Menu::draw()
 	if (!m_visible) {
 		return;
 	}
+
+
 	App.context->imguiStartFrame();
+	Menu::updateSelectedQualityPreset();
 
 #ifdef _DEBUG
 	static bool show_info = true;
@@ -154,11 +157,11 @@ void Menu::draw()
 	ImVec2 window_pos = { (float)App.window.size.x * 0.5f, (float)App.window.size.y * 0.5f };
 	ImVec2 max_size = { (float)App.window.size.x - 20.0f, (float)App.window.size.y - 20.0f };
 	static ImGuiWindowFlags window_flags =
-		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
-		ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+	  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_AlwaysAutoResize |
+	  ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	window_pos_cond = ImGuiCond_Appearing;
 
-	ImGui::SetNextWindowSize({ 640.0f, 500.0f }, ImGuiCond_Always);
+	ImGui::SetNextWindowSize({ 640.0f, 550.0f }, ImGuiCond_Always);
 	ImGui::SetNextWindowSizeConstraints({ 10.0f, 10.0f }, max_size);
 	ImGui::SetNextWindowPos(window_pos, window_pos_cond, ImVec2(0.5f, 0.5f));
 	ImGui::SetNextWindowBgAlpha(0.90f);
@@ -180,10 +183,9 @@ void Menu::draw()
 		// ImGui::SetTabItemClosed("[Screen]");
 		if (tabBegin("[Screen]", 0, &active_tab)) {
 			childBegin("##w1", true, true);
-			drawCheckbox_m("Fullscreen", App.window.fullscreen, "Game will run in windowed mode if unchecked.", fullscreen)
+			drawCombo_m("Quality Preset", App.presets, "Global quality preset, effects performance.", "", presets)
 			{
-				window_pos_cond = ImGuiCond_Always;
-				Menu::applyWindowChanges();
+				Menu::applyQualityPreset();
 			}
 			drawSeparator();
 			ImGui::BeginDisabled(App.window.fullscreen);
@@ -206,6 +208,12 @@ void Menu::draw()
 			ImGui::EndDisabled();
 			ImGui::EndDisabled();
 			childSeparator("##w2", true);
+			drawCheckbox_m("Fullscreen", App.window.fullscreen, "Game will run in windowed mode if unchecked.", fullscreen)
+			{
+				window_pos_cond = ImGuiCond_Always;
+				Menu::applyWindowChanges();
+			}
+			drawSeparator();
 			drawCheckbox_m("V-Sync", App.vsync, "Vertical Synchronization.", vsync)
 			{
 				Menu::applyWindowChanges();
@@ -335,6 +343,46 @@ void Menu::draw()
 		win32::setCursorLock();
 
 	App.context->imguiRender();
+}
+
+void Menu::updateSelectedQualityPreset()
+{
+	int i = 0;
+	int customIndex = 0;
+
+	for (auto preset : App.presets.items) {
+		if (App.bloom.active == preset.value.enable_bloom &&
+		  App.fxaa == preset.value.enable_fxaa &&
+		  App.sharpen.active == preset.value.enable_sharpen &&
+		  App.vsync == preset.value.enable_vsync &&
+		  App.motion_prediction == preset.value.enable_motion_prediction) {
+			App.presets.selected = i;
+			return;
+		}
+		if (preset.name.compare("Custom") == 0) {
+			customIndex = i;
+		}
+		i++;
+	}
+
+	App.presets.selected = customIndex;
+}
+
+void Menu::applyQualityPreset()
+{
+	const d2gl::options_preset val = App.presets.items[App.presets.selected].value;
+
+	if (val.preset_name.compare("Custom") == 0) {
+		return;
+	}
+
+	App.bloom.active = val.enable_bloom;
+	App.fxaa = val.enable_fxaa;
+	App.sharpen.active = val.enable_sharpen;
+	App.vsync = val.enable_vsync;
+	App.motion_prediction = val.enable_motion_prediction;
+
+	Menu::applyWindowChanges();
 }
 
 void Menu::applyWindowChanges()

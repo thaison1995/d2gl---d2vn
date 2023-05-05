@@ -57,6 +57,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\modules\mini_map.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\exports.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\option\config.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\option\options_preset.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)src\graphic\shaders\mod.glsl" />

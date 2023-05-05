@@ -39,6 +39,8 @@ class Menu {
 	Menu();
 	~Menu() = default;
 
+	void updateSelectedQualityPreset();
+	void applyQualityPreset();
 	void applyWindowChanges();
 	bool tabBegin(const char* title, int tab_num, int* active_tab);
 	void tabEnd();

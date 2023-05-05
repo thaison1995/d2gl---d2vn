@@ -20,6 +20,7 @@
 
 #include "graphic/context.h"
 #include "option/config.h"
+#include "option/options_preset.h"
 #include "types.h"
 
 // #define _DEBUG 1
@@ -45,6 +46,7 @@ struct D2GLApp {
 
 	d2gl::Config config;
 	Api api = Api::Glide;
+	Select<d2gl::options_preset> presets = {};
 	std::unique_ptr<Context> context;
 	std::string version = "";
 	bool vsync = true;

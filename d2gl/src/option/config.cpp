@@ -228,6 +228,11 @@ void Config::LoadConfig()
 		index++;
 	}
 
+	App.presets.items.push_back({ "High", options_preset("High", true, true, true, true, true) });
+	App.presets.items.push_back({ "Medium", options_preset("Low", false, false, false, false, true) });
+	App.presets.items.push_back({ "Low", options_preset("Low", false, false, false, false, false) });
+	App.presets.items.push_back({ "Custom", options_preset("Custom", true, true, true, true, true) });
+
 	if (bCreateFile) {
 		SaveConfig();
 	}
