@@ -215,7 +215,7 @@ void Config::LoadConfig()
 	App.resolutions.items.push_back({ "Custom Size", glm::uvec2(0, 0) });
 	for (size_t i = 0; i < window_sizes.size(); i++) {
 		const auto& p = window_sizes[i];
-		if (App.desktop_resolution.x <= p.first || App.desktop_resolution.y <= p.second)
+		if (App.desktop_resolution.x < p.first || App.desktop_resolution.y < p.second)
 			continue;
 
 		char label[50] = { 0 };
