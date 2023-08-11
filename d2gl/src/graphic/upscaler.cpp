@@ -19,7 +19,6 @@
 #include "pch.h"
 #include "upscaler.h"
 #include "helpers.h"
-#include "option/ini.h"
 
 #include <glslang/glslang.h>
 
@@ -219,7 +218,7 @@ bool Upscaler::loadPreset()
 		}
 	}
 
-	option::saveString("Graphic", "shader_preset", preset_name);
+	App.shader.preset = preset_name;
 	return true;
 }
 

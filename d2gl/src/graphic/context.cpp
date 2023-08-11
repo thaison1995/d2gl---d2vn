@@ -531,7 +531,7 @@ void Context::renderThread(void* context)
 		glDeleteSync(sync);
 
 		ReleaseSemaphore(ctx->m_semaphore_gpu[frame_index], 1, NULL);
-		option::Menu::instance().draw();
+		Menu::instance().draw();
 		SwapBuffers(App.hdc);
 
 		if (ctx->m_limiter.active) {
@@ -763,7 +763,7 @@ void Context::presentFrame()
 		m_command_buffer[m_frame_index].m_vertex_mod_count = m_vertices_mod.count;
 		m_frame.drawcall_count++;
 	}
-	option::Menu::instance().check();
+	Menu::instance().check();
 
 	ReleaseSemaphore(m_semaphore_cpu[m_frame_index], 1, NULL);
 	m_frame_index = (m_frame_index + 1) % (App.frame_latency + 1);

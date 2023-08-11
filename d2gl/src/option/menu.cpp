@@ -171,7 +171,7 @@ void Menu::draw()
 		ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 	static ImGuiCond window_pos_cond = ImGuiCond_Appearing;
 
-	ImGui::SetNextWindowSize({ 680.0f, 540.0f }, ImGuiCond_Always);
+	ImGui::SetNextWindowSize({ 680.0f, 600.0f }, ImGuiCond_Always);
 	ImGui::SetNextWindowSizeConstraints({ 10.0f, 10.0f }, max_size);
 	ImGui::SetNextWindowPos(window_pos, window_pos_cond, ImVec2(0.5f, 0.5f));
 	ImGui::SetNextWindowBgAlpha(0.90f);
@@ -200,10 +200,11 @@ void Menu::draw()
 		if (tabBegin("Screen", 0, &active_tab)) {
 			bool changed = m_options.pos_changed;
 			childBegin("##w1", true, true);
-			//drawCombo_m("Quality Preset", App.presets, "Global quality preset, affects performance.", false, 17, presets)
-			//{
-			//	Menu::applyQualityPreset();
-			//}
+			drawCombo_m("Quality Preset", App.presets, "Global quality preset, affects performance.", false, 17, presets)
+			{
+				Menu::applyQualityPreset();
+			}
+			checkChanged(m_options.vsync != App.vsync);
 			drawSeparator();
 			ImGui::BeginDisabled(m_options.window.fullscreen);
 				drawCombo_m("Window Size", App.resolutions, "", false, 17, resolutions);
@@ -389,8 +390,8 @@ void Menu::draw()
 			drawSeparator();
 			drawCheckbox_m("No Pickup", App.no_pickup, "Auto /nopickup option on launch (exclude 1.09d).", no_pickup);
 			drawSeparator();
-			drawCheckbox_m("Show Monster Resistances", App.show_monster_res, "Show monster resistances on hp bar.", show_monster_res);
-			drawSeparator();
+			//drawCheckbox_m("Show Monster Resistances", App.show_monster_res, "Show monster resistances on hp bar.", show_monster_res);
+			//drawSeparator();
 			drawCheckbox_m("Show Item Quantity", App.show_item_quantity, "Show item quantity on bottom left corner of icon.", show_item_quantity);
 			drawSeparator();
 			drawCheckbox_m("Show FPS", App.show_fps, "FPS Counter on bottom center.", show_fps);
@@ -452,19 +453,19 @@ void Menu::draw()
 		ImGui::EndTabBar();
 	}
 	ImGui::PopFont();
-	if (active_tab != 3) {
-		ImGui::SetCursorPos({ 16.0f, 500.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-		ImGui::BeginChildFrame(ImGui::GetID("#wiki"), { 300.0f, 24.0f }, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
-		ImGui::PopStyleVar(3);
-		ImGui::PushFont(m_fonts[15]);
-		if (ImGui::Button(" Open Configuration Wiki Page > "))
-			ShellExecute(0, 0, L"https://github.com/bayaraa/d2gl/wiki/Configuration", 0, 0, SW_SHOW);
-		ImGui::PopFont();
-		ImGui::EndChildFrame();
-	}
+	//if (active_tab != 3) {
+	//	ImGui::SetCursorPos({ 16.0f, 500.0f });
+	//	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
+	//	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+	//	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+	//	ImGui::BeginChildFrame(ImGui::GetID("#wiki"), { 300.0f, 24.0f }, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground);
+	//	ImGui::PopStyleVar(3);
+	//	ImGui::PushFont(m_fonts[15]);
+	//	if (ImGui::Button(" Open Configuration Wiki Page > "))
+	//		ShellExecute(0, 0, L"https://github.com/bayaraa/d2gl/wiki/Configuration", 0, 0, SW_SHOW);
+	//	ImGui::PopFont();
+	//	ImGui::EndChildFrame();
+	//}
 	ImGui::End();
 
 	// clang-format on
@@ -473,7 +474,7 @@ void Menu::draw()
 
 	App.context->imguiRender();
 }
-/*
+
 void Menu::updateSelectedQualityPreset()
 {
 	int i = 0;
@@ -481,10 +482,12 @@ void Menu::updateSelectedQualityPreset()
 
 	for (auto preset : App.presets.items) {
 		if (App.bloom.active == preset.value.enable_bloom &&
-		  App.fxaa == preset.value.enable_fxaa &&
-		  App.sharpen.active == preset.value.enable_sharpen &&
-		  App.vsync == preset.value.enable_vsync &&
-		  App.motion_prediction == preset.value.enable_motion_prediction) {
+			App.fxaa.active == preset.value.enable_fxaa &&
+			App.fxaa.presets.selected == preset.value.fxaa_quality &&
+			App.sharpen.active == preset.value.enable_sharpen &&
+			m_options.vsync == preset.value.enable_vsync &&
+			App.motion_prediction == preset.value.enable_motion_prediction)
+		{
 			App.presets.selected = i;
 			return;
 		}
@@ -506,31 +509,13 @@ void Menu::applyQualityPreset()
 	}
 
 	App.bloom.active = val.enable_bloom;
-	App.fxaa = val.enable_fxaa;
+	App.fxaa.active = val.enable_fxaa;
+	App.fxaa.presets.selected = val.fxaa_quality;
 	App.sharpen.active = val.enable_sharpen;
-	App.vsync = val.enable_vsync;
+	m_options.vsync = val.enable_vsync;
 	App.motion_prediction = val.enable_motion_prediction;
-
-	Menu::applyWindowChanges();
 }
 
-void Menu::applyWindowChanges()
-{
-	if (App.resolutions.selected) {
-		const auto val = App.resolutions.items[App.resolutions.selected].value;
-		App.window.size_save = val;
-	}
-
-	if (App.window.size != App.window.size_save) {
-		window_pos_cond = ImGuiCond_Always;
-	}
-
-	App.window.size = App.window.size_save;
-
-	win32::setWindowRect();
-	win32::windowResize();
-}
-*/
 bool Menu::tabBegin(const char* title, int tab_num, int* active_tab)
 {
 	static const ImVec4 inactive_col = ImColor(100, 100, 100, 200);
