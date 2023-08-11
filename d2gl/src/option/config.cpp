@@ -5,11 +5,11 @@
 
 namespace d2gl {
 
-int Config::GetInt(std::string key, int def, int min = INT_MIN, int max = INT_MAX)
+int Config::GetInt(std::string sectionKey, std::string key, int def, int min = INT_MIN, int max = INT_MAX)
 {
 	int val = def;
-	if (yaml[key]) {
-		val = yaml[key].as<int>();
+	if (yaml[sectionKey][key]) {
+		val = yaml[sectionKey][key].as<int>();
 	}
 
 	if (min != INT_MIN && val < min) {
@@ -23,11 +23,11 @@ int Config::GetInt(std::string key, int def, int min = INT_MIN, int max = INT_MA
 	return val;
 }
 
-float Config::GetFloat(std::string key, float def, float min, float max)
+float Config::GetFloat(std::string sectionKey, std::string key, float def, float min, float max)
 {
 	float val = def;
-	if (yaml[key]) {
-		val = yaml[key].as<float>();
+	if (yaml[sectionKey][key]) {
+		val = yaml[sectionKey][key].as<float>();
 	}
 
 	if (val < min) {
@@ -41,73 +41,88 @@ float Config::GetFloat(std::string key, float def, float min, float max)
 	return val;
 }
 
-bool Config::GetBool(std::string key, bool def)
+bool Config::GetBool(std::string sectionKey, std::string key, bool def)
 {
 	bool val = def;
-	if (yaml[key]) {
-		val = yaml[key].as<bool>();
+	if (yaml[sectionKey][key]) {
+		val = yaml[sectionKey][key].as<bool>();
 	}
 	return val;
 }
 
-std::string Config::GetString(std::string key, const std::string& def)
+std::string Config::GetString(std::string sectionKey, std::string key, const std::string& def)
 {
 	std::string val = def;
-	if (yaml[key]) {
-		val = yaml[key].as<std::string>();
+	if (yaml[sectionKey][key]) {
+		val = yaml[sectionKey][key].as<std::string>();
 	}
 	return val;
 }
 
 void Config::SaveConfig()
 {
-	yaml["window_size_width"] = App.window.size.x;
-	yaml["window_size_height"] = App.window.size.y;
-	yaml["window_fullscreen"] = App.window.fullscreen;
-	yaml["auto_minimize"] = App.window.auto_minimize;
-	yaml["window_dark_mode"] = App.window.dark_mode;
-	yaml["window_vsync"] = App.vsync;
-	yaml["unlock_cursor"] = App.cursor.unlock;
-	yaml["window_centered"] = App.window.centered;
-	yaml["window_position_x"] = App.window.position.x;
-	yaml["window_position_y"] = App.window.position.y;
-	yaml["foreground_fps_active"] = App.foreground_fps.active;
-	yaml["foreground_fps_value"] = App.foreground_fps.range.value;
-	yaml["background_fps_active"] = App.background_fps.active;
-	yaml["background_fps_value"] = App.background_fps.range.value;
-	yaml["shader_preset"] = App.shader.preset;
-	yaml["lut"] = App.lut.selected;
-	yaml["fxaa"] = App.fxaa.active;
-	yaml["fxaa_preset"] = App.fxaa.presets.selected;
-	yaml["sharpen"] = App.sharpen.active;
-	yaml["sharpen_strength"] = App.sharpen.strength.value;
-	yaml["sharpen_clamp"] = App.sharpen.clamp.value;
-	yaml["sharpen_radius"] = App.sharpen.radius.value;
-	yaml["bloom"] = App.bloom.active;
-	yaml["bloom_exposure"] = App.bloom.exposure.value;
-	yaml["bloom_gamma"] = App.bloom.gamma.value;
-	yaml["stretched_horizontal"] = App.viewport.stretched.x;
-	yaml["stretched_vertical"] = App.viewport.stretched.y;
-	yaml["hd_cursor"] = App.hd_cursor;
-	yaml["hd_text"] = App.hd_text.active;
-	yaml["hd_text_scale"] = App.hd_text.scale.value;
-	yaml["hd_orbs"] = App.hd_orbs.active;
-	yaml["hd_orbs_centered"] = App.hd_orbs.centered;
-	yaml["mini_map"] = App.mini_map.active;
-	yaml["mini_map_text_over"] = App.mini_map.text_over;
-	yaml["mini_map_width"] = App.mini_map.width.value;
-	yaml["mini_map_height"] = App.mini_map.height.value;
+	// Screen Tab
+	yaml["screen"] = YAML::Node(YAML::NodeType::Map);
+	YAML::Node yamlScreen = yaml["screen"];
+	yamlScreen["window_size_width"] = App.window.size.x;
+	yamlScreen["window_size_height"] = App.window.size.y;
+	yamlScreen["window_centered"] = App.window.centered;
+	yamlScreen["window_position_x"] = App.window.position.x;
+	yamlScreen["window_position_y"] = App.window.position.y;
+	yamlScreen["unlock_cursor"] = App.cursor.unlock;
+	yamlScreen["window_fullscreen"] = App.window.fullscreen;
+	yamlScreen["window_vsync"] = App.vsync;
+	yamlScreen["foreground_fps_active"] = App.foreground_fps.active;
+	yamlScreen["foreground_fps_value"] = App.foreground_fps.range.value;
+	yamlScreen["background_fps_active"] = App.background_fps.active;
+	yamlScreen["background_fps_value"] = App.background_fps.range.value;
+	yamlScreen["auto_minimize"] = App.window.auto_minimize;
+	yamlScreen["window_dark_mode"] = App.window.dark_mode;
 
-	yaml["motion_prediction"] = App.motion_prediction;
-	yaml["skip_intro"] = App.skip_intro;
-	yaml["no_pickup"] = App.no_pickup;
-	yaml["show_item_quantity"] = App.show_item_quantity;
-	yaml["show_fps"] = App.show_fps;
-	yaml["gl_ver_major"] = (int)App.gl_ver.x;
-	yaml["gl_ver_minor"] = (int)App.gl_ver.y;
-	yaml["use_compute_shader"] = App.use_compute_shader;
-	yaml["load_dlls_early"] = App.dlls_early;
-	yaml["load_dlls_late"] = App.dlls_late;
+	// Graphics Tab
+	yaml["graphics"] = YAML::Node(YAML::NodeType::Map);
+	YAML::Node yamlGraphics = yaml["graphics"];
+	yamlGraphics["shader_preset"] = App.shader.preset;
+	yamlGraphics["sharpen"] = App.sharpen.active;
+	yamlGraphics["sharpen_strength"] = App.sharpen.strength.value;
+	yamlGraphics["sharpen_clamp"] = App.sharpen.clamp.value;
+	yamlGraphics["sharpen_radius"] = App.sharpen.radius.value;
+	yamlGraphics["fxaa"] = App.fxaa.active;
+	yamlGraphics["fxaa_preset"] = App.fxaa.presets.selected;
+	yamlGraphics["lut"] = App.lut.selected;
+	yamlGraphics["bloom"] = App.bloom.active;
+	yamlGraphics["bloom_exposure"] = App.bloom.exposure.value;
+	yamlGraphics["bloom_gamma"] = App.bloom.gamma.value;
+	yamlGraphics["stretched_horizontal"] = App.viewport.stretched.x;
+	yamlGraphics["stretched_vertical"] = App.viewport.stretched.y;
+
+	// Features Tab
+	yaml["features"] = YAML::Node(YAML::NodeType::Map);
+	YAML::Node yamlFeatures = yaml["features"];
+	yamlFeatures["hd_cursor"] = App.hd_cursor;
+	yamlFeatures["hd_text"] = App.hd_text.active;
+	yamlFeatures["hd_text_scale"] = App.hd_text.scale.value;
+	yamlFeatures["mini_map"] = App.mini_map.active;
+	yamlFeatures["mini_map_text_over"] = App.mini_map.text_over;
+	yamlFeatures["mini_map_width"] = App.mini_map.width.value;
+	yamlFeatures["mini_map_height"] = App.mini_map.height.value;
+	yamlFeatures["motion_prediction"] = App.motion_prediction;
+	yamlFeatures["skip_intro"] = App.skip_intro;
+	yamlFeatures["no_pickup"] = App.no_pickup;
+	yamlFeatures["show_item_quantity"] = App.show_item_quantity;
+	yamlFeatures["show_fps"] = App.show_fps;
+	// yamlFeatures["hd_orbs"] = App.hd_orbs.active;
+	// yamlFeatures["hd_orbs_centered"] = App.hd_orbs.centered;
+
+	// Other
+	yaml["other"] = YAML::Node(YAML::NodeType::Map);
+	YAML::Node yamlOther = yaml["other"];
+	yamlOther["gl_ver_major"] = (int)App.gl_ver.x;
+	yamlOther["gl_ver_minor"] = (int)App.gl_ver.y;
+	yamlOther["use_compute_shader"] = App.use_compute_shader;
+	yamlOther["frame_latency"] = App.frame_latency;
+	yamlOther["load_dlls_early"] = App.dlls_early;
+	yamlOther["load_dlls_late"] = App.dlls_late;
 
 	std::ofstream fout(App.yaml_file);
 	fout << yaml;
@@ -141,71 +156,71 @@ void Config::LoadConfig()
 		GetSystemMetrics(SM_CXVIRTUALSCREEN),
 		GetSystemMetrics(SM_CYVIRTUALSCREEN)
 	};
+
+	// Screen Tab
 	App.window.size = App.desktop_resolution;
-	App.window.size.x = d2gl::Config::GetInt("window_size_width", App.window.size.x, 800, App.desktop_resolution.z);
-	App.window.size.y = d2gl::Config::GetInt("window_size_height", App.window.size.y, 600, App.desktop_resolution.w);
+	App.window.size.x = d2gl::Config::GetInt("screen", "window_size_width", App.window.size.x, 800, App.desktop_resolution.z);
+	App.window.size.y = d2gl::Config::GetInt("screen", "window_size_height", App.window.size.y, 600, App.desktop_resolution.w);
 	App.window.size_save = App.window.size;
+	App.window.centered = d2gl::Config::GetBool("screen", "window_centered", true);
+	App.window.position.x = d2gl::Config::GetInt("screen", "window_position_x", App.window.position.x, App.desktop_resolution.x, App.desktop_resolution.z);
+	App.window.position.y = d2gl::Config::GetInt("screen", "window_position_y", App.window.position.y, App.desktop_resolution.y, App.desktop_resolution.w);
+	App.cursor.unlock = d2gl::Config::GetBool("screen", "unlock_cursor", App.cursor.unlock);
 
-	App.window.fullscreen = d2gl::Config::GetBool("window_fullscreen", true);
-	App.window.auto_minimize = d2gl::Config::GetBool("auto_minimize", App.window.auto_minimize);
-	App.window.dark_mode = d2gl::Config::GetBool("window_dark_mode", true);
-	App.vsync = d2gl::Config::GetBool("window_vsync", true);
-	App.window.centered = d2gl::Config::GetBool("window_centered", true);
-	App.cursor.unlock = d2gl::Config::GetBool("unlock_cursor", App.cursor.unlock);
+	App.window.fullscreen = d2gl::Config::GetBool("screen", "window_fullscreen", true);
+	App.vsync = d2gl::Config::GetBool("screen", "window_vsync", true);
+	App.foreground_fps.active = d2gl::Config::GetBool("screen", "foreground_fps_active", true);
+	App.foreground_fps.range.value = d2gl::Config::GetInt("screen", "foreground_fps_value", App.foreground_fps.range.value, App.foreground_fps.range.min, App.foreground_fps.range.max);
+	App.background_fps.active = d2gl::Config::GetBool("screen", "background_fps_active", true);
+	App.background_fps.range.value = d2gl::Config::GetInt("screen", "background_fps_value", App.background_fps.range.value, App.background_fps.range.min, App.background_fps.range.max);
+	App.window.auto_minimize = d2gl::Config::GetBool("screen", "auto_minimize", App.window.auto_minimize);
+	App.window.dark_mode = d2gl::Config::GetBool("screen", "window_dark_mode", true);
 
-	// Window Position
-	App.window.position.x = d2gl::Config::GetInt("window_position_x", App.window.position.x, App.desktop_resolution.x, App.desktop_resolution.z);
-	App.window.position.y = d2gl::Config::GetInt("window_position_y", App.window.position.y, App.desktop_resolution.y, App.desktop_resolution.w);
+	// Graphics Tab
+	App.shader.preset = d2gl::Config::GetString("graphics", "shader_preset", App.shader.preset);
 
-	App.foreground_fps.active = d2gl::Config::GetBool("foreground_fps_active", true);
-	App.foreground_fps.range.value = d2gl::Config::GetInt("foreground_fps_value", App.foreground_fps.range.value, App.foreground_fps.range.min, App.foreground_fps.range.max);
-	App.background_fps.active = d2gl::Config::GetBool("background_fps_active", true);
-	App.background_fps.range.value = d2gl::Config::GetInt("background_fps_value", App.background_fps.range.value, App.background_fps.range.min, App.background_fps.range.max);
+	App.sharpen.active = d2gl::Config::GetBool("graphics", "sharpen", App.sharpen.active);
+	App.sharpen.strength.value = d2gl::Config::GetFloat("graphics", "sharpen_strength", App.sharpen.strength.value, App.sharpen.strength.min, App.sharpen.strength.max);
+	App.sharpen.clamp.value = d2gl::Config::GetFloat("graphics", "sharpen_clamp", App.sharpen.clamp.value, App.sharpen.clamp.min, App.sharpen.clamp.max);
+	App.sharpen.radius.value = d2gl::Config::GetFloat("graphics", "sharpen_radius", App.sharpen.radius.value, App.sharpen.radius.min, App.sharpen.radius.max);
+	App.fxaa.active = d2gl::Config::GetBool("graphics", "fxaa", App.fxaa.active);
+	App.fxaa.presets.selected = d2gl::Config::GetInt("graphics", "fxaa_preset", App.fxaa.presets.selected, 0, 2);
 
-	App.shader.preset = d2gl::Config::GetString("shader_preset", App.shader.preset);
+	App.lut.selected = d2gl::Config::GetInt("graphics", "lut", App.lut.selected, 0, App.lut.items.size() - 1);
+	App.bloom.active = d2gl::Config::GetBool("graphics", "bloom", App.bloom.active);
+	App.bloom.exposure.value = d2gl::Config::GetFloat("graphics", "bloom_exposure", App.bloom.exposure.value, App.bloom.exposure.min, App.bloom.exposure.max);
+	App.bloom.gamma.value = d2gl::Config::GetFloat("graphics", "bloom_gamma", App.bloom.gamma.value, App.bloom.gamma.min, App.bloom.gamma.max);
+	App.viewport.stretched.x = d2gl::Config::GetBool("graphics", "stretched_horizontal", App.viewport.stretched.x);
+	App.viewport.stretched.y = d2gl::Config::GetBool("graphics", "stretched_vertical", App.viewport.stretched.y);
 
-	App.lut.selected = d2gl::Config::GetInt("lut", App.lut.selected, 0, App.lut.items.size() - 1);
-	App.fxaa.active = d2gl::Config::GetBool("fxaa", App.fxaa.active);
-	App.fxaa.presets.selected = d2gl::Config::GetInt("fxaa_preset", App.fxaa.presets.selected, 0, 2);
+	// Features Tab
+	App.hd_cursor = d2gl::Config::GetBool("features", "hd_cursor", App.hd_cursor);
+	App.hd_text.active = d2gl::Config::GetBool("features", "hd_text", App.hd_text.active);
+	App.hd_text.scale.value = ISHDTEXT() ? 1.0f : d2gl::Config::GetFloat("features", "hd_text_scale", App.hd_text.scale.value, 0.8f, 1.2f);
+	App.mini_map.active = d2gl::Config::GetBool("features", "mini_map", App.mini_map.active) && ISGLIDE3X();
+	App.mini_map.text_over = d2gl::Config::GetBool("features", "mini_map_text_over", App.mini_map.text_over) && ISGLIDE3X();
+	App.mini_map.width.value = d2gl::Config::GetInt("features", "mini_map_width", App.mini_map.width.value, App.mini_map.width.min, App.mini_map.width.max);
+	App.mini_map.height.value = d2gl::Config::GetInt("features", "mini_map_height", App.mini_map.height.value, App.mini_map.height.min, App.mini_map.height.max);
+	//App.hd_orbs.active = d2gl::Config::GetBool("features", "hd_orbs", App.hd_orbs.active);
+	//App.hd_orbs.centered = d2gl::Config::GetBool("features", "hd_orbs_centered", App.hd_orbs.centered);
 
-	App.sharpen.active = d2gl::Config::GetBool("sharpen", App.sharpen.active);
-	App.sharpen.strength.value = d2gl::Config::GetFloat("sharpen_strength", App.sharpen.strength.value, App.sharpen.strength.min, App.sharpen.strength.max);
-	App.sharpen.clamp.value = d2gl::Config::GetFloat("sharpen_clamp", App.sharpen.clamp.value, App.sharpen.clamp.min, App.sharpen.clamp.max);
-	App.sharpen.radius.value = d2gl::Config::GetFloat("sharpen_radius", App.sharpen.radius.value, App.sharpen.radius.min, App.sharpen.radius.max);
+	App.motion_prediction = d2gl::Config::GetBool("features", "motion_prediction", App.motion_prediction);
+	App.skip_intro = d2gl::Config::GetBool("features", "skip_intro", App.skip_intro);
+	App.no_pickup = d2gl::Config::GetBool("features", "no_pickup", App.no_pickup);
+	App.show_item_quantity = d2gl::Config::GetBool("features", "show_item_quantity", App.show_item_quantity);
+	App.show_fps = d2gl::Config::GetBool("features", "show_fps", App.show_fps);
 
-	App.bloom.active = d2gl::Config::GetBool("bloom", App.bloom.active);
-	App.bloom.exposure.value = d2gl::Config::GetFloat("bloom_exposure", App.bloom.exposure.value, App.bloom.exposure.min, App.bloom.exposure.max);
-	App.bloom.gamma.value = d2gl::Config::GetFloat("bloom_gamma", App.bloom.gamma.value, App.bloom.gamma.min, App.bloom.gamma.max);
-
-	App.viewport.stretched.x = d2gl::Config::GetBool("stretched_horizontal", App.viewport.stretched.x);
-	App.viewport.stretched.y = d2gl::Config::GetBool("stretched_vertical", App.viewport.stretched.y);
-
-	App.hd_cursor = d2gl::Config::GetBool("hd_cursor", App.hd_cursor);
-	App.hd_text.active = d2gl::Config::GetBool("hd_text", App.hd_text.active);
-	App.hd_text.scale.value = ISHDTEXT() ? 1.0f : d2gl::Config::GetFloat("hd_text_scale", App.hd_text.scale.value, 0.8f, 1.2f);
-	App.hd_orbs.active = d2gl::Config::GetBool("hd_orbs", App.hd_orbs.active);
-	App.hd_orbs.centered = d2gl::Config::GetBool("hd_orbs_centered", App.hd_orbs.centered);
-	App.mini_map.active = d2gl::Config::GetBool("mini_map", App.mini_map.active) && ISGLIDE3X();
-	App.mini_map.text_over = d2gl::Config::GetBool("mini_map_text_over", App.mini_map.text_over) && ISGLIDE3X();
-	App.mini_map.width.value = d2gl::Config::GetInt("mini_map_width", App.mini_map.width.value, App.mini_map.width.min, App.mini_map.width.max);
-	App.mini_map.height.value = d2gl::Config::GetInt("mini_map_height", App.mini_map.height.value, App.mini_map.height.min, App.mini_map.height.max);
-
-	App.motion_prediction = d2gl::Config::GetBool("motion_prediction", App.motion_prediction);
-	App.skip_intro = d2gl::Config::GetBool("skip_intro", App.skip_intro);
-	App.no_pickup = d2gl::Config::GetBool("no_pickup", App.no_pickup);
-	App.show_item_quantity = d2gl::Config::GetBool("show_item_quantity", App.show_item_quantity);
-	App.show_fps = d2gl::Config::GetBool("show_fps", App.show_fps);
-
-	App.gl_ver.x = d2gl::Config::GetInt("gl_ver_major", App.gl_ver.x, 3, 4);
-	App.gl_ver.y = d2gl::Config::GetInt("gl_ver_minor", App.gl_ver.y, 0, 6);
+	// Other
+	App.gl_ver.x = d2gl::Config::GetInt("other", "gl_ver_major", App.gl_ver.x, 3, 4);
+	App.gl_ver.y = d2gl::Config::GetInt("other", "gl_ver_minor", App.gl_ver.y, 0, 6);
 	if (App.gl_ver.x == 3) {
 		App.gl_ver.y = 3;
 	}
 
-	App.use_compute_shader = d2gl::Config::GetBool("use_compute_shader", App.use_compute_shader);
-
-	App.dlls_early = d2gl::Config::GetString("load_dlls_early", App.dlls_early);
-	App.dlls_late = d2gl::Config::GetString("load_dlls_late", App.dlls_late);
+	App.use_compute_shader = d2gl::Config::GetBool("other", "use_compute_shader", App.use_compute_shader);
+	App.frame_latency = d2gl::Config::GetInt("other", "frame_latency", App.frame_latency, 1, 5);
+	App.dlls_early = d2gl::Config::GetString("other", "load_dlls_early", App.dlls_early);
+	App.dlls_late = d2gl::Config::GetString("other", "load_dlls_late", App.dlls_late);
 
 
 	// Setup resolutions

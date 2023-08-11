@@ -11,9 +11,9 @@ public:
 private:
 	YAML::Node yaml;
 
-	int GetInt(std::string key, int def, int min, int max);
-	float GetFloat(std::string key, float def, float min, float max);
-	bool GetBool(std::string key, bool def);
-	std::string GetString(std::string key, const std::string& def);
+	int GetInt(std::string sectionKey, std::string key, int def, int min, int max);
+	float GetFloat(std::string sectionKey, std::string key, float def, float min, float max);
+	bool GetBool(std::string sectionKey, std::string key, bool def);
+	std::string GetString(std::string sectionKey, std::string key, const std::string& def);
 };
 }
