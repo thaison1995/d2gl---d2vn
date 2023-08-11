@@ -56,6 +56,11 @@ bool isEscMenuOpen()
 	return *esc_menu_open || control;
 }
 
+bool isLangCJK(uint32_t lang_id)
+{
+	return lang_id == LANG_JPN || lang_id == LANG_KOR || lang_id == LANG_CHI;
+}
+
 UnitAny* getPlayerUnit()
 {
 	return (UnitAny*)*(uintptr_t*)player_unit;
@@ -108,6 +113,11 @@ bool isUnitDead(UnitAny* unit)
 	return unit && (d2::getUnitFlag(unit) & 0x10000);
 }
 
+char* getPlayerName(UnitAny* unit)
+{
+	return (char*)(isVer(V_109d) ? unit->v109.pPlayerData->szName : unit->v110.pPlayerData->szName);
+}
+
 MonsterType getMonsterType(UnitAny* unit)
 {
 	if (isVer(V_109d)) {
@@ -132,17 +142,22 @@ wchar_t* getMonsterName(UnitAny* unit)
 	return isVer(V_109d) ? unit->v109.pMonsterData->wName : unit->v110.pMonsterData->wName;
 }
 
-ItemQuality getItemQuality(UnitAny* unit)
-{
-	return isVer(V_109d) ? unit->v109.pItemData->dwQuality : unit->v110.pItemData->dwQuality;
-}
-
 bool isMercUnit(UnitAny* unit)
 {
 	if (unit->dwType != d2::UnitType::Monster || isVer(V_109d))
 		return false;
 
-	return unit->v110.dwClassId == MERC_A1 || unit->v110.dwClassId == MERC_A2 || unit->v110.dwClassId == MERC_A3 || unit->v110.dwClassId == MERC_A5;
+	return unit->v110.dwClassId == MERC_A1 || unit->v110.dwClassId == MERC_A2 || unit->v110.dwClassId == MERC_A3 || unit->v110.dwClassId == MERC_A4 || unit->v110.dwClassId == MERC_A5;
+}
+
+ItemQuality getItemQuality(UnitAny* unit)
+{
+	return isVer(V_109d) ? unit->v109.pItemData->dwQuality : unit->v110.pItemData->dwQuality;
+}
+
+BYTE getItemLocation(UnitAny* unit)
+{
+	return isVer(V_109d) ? unit->v109.pItemData->ItemLocation : unit->v110.pItemData->ItemLocation;
 }
 
 CellFile* getCellFile(CellContext* cell)
@@ -176,29 +191,31 @@ void gameDrawBegin()
 void automapDrawBegin()
 {
 	App.game.draw_stage = DrawStage::Map;
-	if (App.game.onStageChange)
-		App.game.onStageChange();
+	App.context->onStageChange();
 }
 
 void automapDrawEnd()
 {
 	App.game.draw_stage = DrawStage::HUD;
-	if (App.game.onStageChange)
-		App.game.onStageChange();
+	App.context->onStageChange();
 }
 
 void uiDrawBegin()
 {
 	App.game.draw_stage = DrawStage::UI;
-	if (App.game.onStageChange)
-		App.game.onStageChange();
+	App.context->onStageChange();
+}
+
+void uiDrawCursorItem()
+{
+	App.game.draw_stage = DrawStage::CursorItem;
+	App.context->onStageChange();
 }
 
 void uiDrawEnd()
 {
 	App.game.draw_stage = DrawStage::Cursor;
-	if (App.game.onStageChange)
-		App.game.onStageChange();
+	App.context->onStageChange();
 }
 
 void __stdcall drawImageHooked(CellContext* cell, int x, int y, uint32_t gamma, int draw_mode, uint8_t* palette)
@@ -206,10 +223,12 @@ void __stdcall drawImageHooked(CellContext* cell, int x, int y, uint32_t gamma, 
 	if (App.hd_cursor && App.game.draw_stage >= DrawStage::Cursor)
 		return;
 
-	if (modules::HDText::Instance().drawImage(cell, x, y, gamma, draw_mode)) {
+	if (modules::HDText::Instance().drawImage(cell, x, y, draw_mode)) {
 		const auto pos = modules::MotionPrediction::Instance().drawImage(x, y, D2DrawFn::Image, gamma, draw_mode);
 		drawImage(cell, pos.x, pos.y, gamma, draw_mode, palette);
 	}
+
+	modules::HDText::drawItemQuantity(true);
 }
 
 void __stdcall drawPerspectiveImageHooked(CellContext* cell, int x, int y, uint32_t gamma, int draw_mode, int screen_mode, uint8_t* palette)
@@ -220,7 +239,7 @@ void __stdcall drawPerspectiveImageHooked(CellContext* cell, int x, int y, uint3
 
 void __stdcall drawShiftedImageHooked(CellContext* cell, int x, int y, uint32_t gamma, int draw_mode, int global_palette_shift)
 {
-	if (modules::HDText::Instance().drawShiftedImage(cell, x, y, gamma, draw_mode)) {
+	if (modules::HDText::Instance().drawShiftedImage(cell, x, y)) {
 		auto pos = modules::MotionPrediction::Instance().drawImage(x, y, D2DrawFn::ShiftedImage);
 		drawShiftedImage(cell, pos.x, pos.y, gamma, draw_mode, global_palette_shift);
 	}
@@ -228,6 +247,11 @@ void __stdcall drawShiftedImageHooked(CellContext* cell, int x, int y, uint32_t 
 
 void __stdcall drawVerticalCropImageHooked(CellContext* cell, int x, int y, int skip_lines, int draw_lines, int draw_mode)
 {
+	if (modules::HDText::Instance().isActive() && App.game.draw_stage >= DrawStage::UI) {
+		if (y < 150 || (*d2::screen_shift >= SCREENPANEL_LEFT && y < (int)*d2::screen_height - 100 && x < (int)*d2::screen_width / 2))
+			return;
+	}
+
 	const auto pos = modules::MotionPrediction::Instance().drawImage(x, y, D2DrawFn::VerticalCropImage);
 	drawVerticalCropImage(cell, pos.x, pos.y, skip_lines, draw_lines, draw_mode);
 }
@@ -253,9 +277,10 @@ void __stdcall drawShadowHooked(CellContext* cell, int x, int y)
 void __stdcall drawSolidRectExHooked(int left, int top, int right, int bottom, uint32_t color, int draw_mode)
 {
 	auto offset = modules::MotionPrediction::Instance().drawSolidRect();
-
 	if (!modules::HDText::Instance().drawSolidRect(left - offset.x, top - offset.y, right - offset.x, bottom - offset.y, color, draw_mode))
 		drawSolidRectEx(left - offset.x, top - offset.y, right - offset.x, bottom - offset.y, color, draw_mode);
+
+	modules::HDText::drawItemQuantity(false, left, bottom);
 }
 
 void __stdcall drawLineHooked(int x_start, int y_start, int x_end, int y_end, uint8_t color, uint8_t alpha)
@@ -266,12 +291,14 @@ void __stdcall drawLineHooked(int x_start, int y_start, int x_end, int y_end, ui
 
 bool __stdcall drawGroundTileHooked(TileContext* tile, GFXLight* light, int x, int y, int world_x, int world_y, uint8_t alpha, int screen_panels, bool tile_data)
 {
-	const auto len = strlen(tile->szTileName);
-	if (len > 8) {
-		const auto name = tile->szTileName + len - 8;
-		// Warp.dt1 is invisible and is used for functionality, no need to draw it
-		if (strcmp(name, "Warp.dt1") == 0)
-			return true;
+	// Drawing invisible tile crashes on glide mode.
+	if (ISGLIDE3X() && tile) {
+		const auto len = strlen(tile->szTileName);
+		if (len > 8) {
+			const auto name = tile->szTileName + len - 8;
+			if (_stricmp(name, "Warp.dt1") == 0)
+				return true;
+		}
 	}
 
 	const auto offset = modules::MotionPrediction::Instance().getGlobalOffset();
@@ -298,11 +325,15 @@ bool __stdcall drawShadowTileHooked(TileContext* tile, int x, int y, int draw_mo
 
 void __fastcall takeScreenShotHooked()
 {
-	App.context->takeScreenShot();
+	App.context->getCommandBuffer()->pushCommand(CommandType::TakeScreenShot);
 }
 
 void __fastcall drawNormalTextHooked(const wchar_t* str, int x, int y, uint32_t color, uint32_t centered)
 {
+	// Glide mode light gray text appears black. So direct to dark gray.
+	if (ISGLIDE3X() && !App.hd_text.active && color == 15)
+		color = 5;
+
 	const auto pos = modules::MotionPrediction::Instance().drawText(str, x, y, D2DrawFn::NormalText);
 	if (!modules::HDText::Instance().drawText(str, pos.x, pos.y, color, centered))
 		drawNormalText(str, pos.x, pos.y, color, centered);
@@ -311,7 +342,7 @@ void __fastcall drawNormalTextHooked(const wchar_t* str, int x, int y, uint32_t 
 void __fastcall drawNormalTextExHooked(const wchar_t* str, int x, int y, uint32_t color, uint32_t centered, uint32_t trans_lvl)
 {
 	const auto pos = modules::MotionPrediction::Instance().drawText(str, x, y, D2DrawFn::NormalTextEx);
-	if (!modules::HDText::Instance().drawText(str, pos.x, pos.y, color, centered))
+	if (!modules::HDText::Instance().drawText(str, pos.x, pos.y, color, centered, trans_lvl))
 		drawNormalTextEx(str, pos.x, pos.y, color, centered, trans_lvl);
 }
 
@@ -325,7 +356,7 @@ void __fastcall drawFramedTextHooked(const wchar_t* str, int x, int y, uint32_t 
 void __fastcall drawRectangledTextHooked(const wchar_t* str, int x, int y, uint32_t rect_color, uint32_t rect_transparency, uint32_t color)
 {
 	const auto pos = modules::MotionPrediction::Instance().drawText(str, x, y, D2DrawFn::RectangledText);
-	if (!modules::HDText::Instance().drawRectangledText(str, pos.x, pos.y, rect_color, rect_transparency, color))
+	if (!modules::HDText::Instance().drawRectangledText(str, pos.x, pos.y, rect_transparency, color))
 		drawRectangledText(str, pos.x, pos.y, rect_color, rect_transparency, color);
 }
 
@@ -389,6 +420,11 @@ void altItemsText()
 void drawRectFrame()
 {
 	modules::HDText::Instance().drawRectFrame();
+}
+
+void drawUnitHealthBar()
+{
+	modules::HDText::Instance().drawUnitHealthBar();
 }
 
 void loadUIImage()

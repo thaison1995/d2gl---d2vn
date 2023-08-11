@@ -40,6 +40,30 @@ bool fileExists(std::string file_path)
 	return std::filesystem::exists(file_path) && std::filesystem::is_regular_file(file_path);
 }
 
+std::string filePathFix(std::string parent_file_path, std::string file_path)
+{
+	helpers::replaceAll(parent_file_path, "/", "\\");
+	parent_file_path = parent_file_path.substr(0, parent_file_path.rfind('\\'));
+
+	helpers::replaceAll(file_path, "/", "\\");
+	if (file_path.find(".\\") == 0)
+		file_path = file_path.substr(2);
+
+	size_t occurence_pos = 0;
+	while (file_path.find("..\\", occurence_pos) != std::string::npos)
+		occurence_pos += 3;
+
+	if (occurence_pos) {
+		file_path = file_path.substr(occurence_pos);
+		for (size_t i = 0; i < occurence_pos / 3; i++) {
+			size_t pos = parent_file_path.rfind("\\");
+			if (pos != std::string::npos)
+				parent_file_path = parent_file_path.substr(0, pos);
+		}
+	}
+	return parent_file_path + "\\" + file_path;
+}
+
 std::vector<std::string> strToLines(const std::string& str)
 {
 	std::vector<std::string> result;
@@ -62,6 +86,22 @@ std::vector<std::wstring> strToLines(const std::wstring& str)
 	return result;
 }
 
+std::vector<std::string> splitToVector(const std::string& str, char delimeter)
+{
+	uint32_t index = 0;
+	std::vector<std::string> segments = { "" };
+
+	for (auto& c : str) {
+		if (c == delimeter) {
+			segments.push_back("");
+			index++;
+		} else
+			segments[index].push_back(c);
+	}
+
+	return segments;
+}
+
 void replaceAll(std::string& str, const std::string& from, const std::string& to)
 {
 	size_t start_pos = 0;
@@ -74,6 +114,47 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 void strToLower(std::string& str)
 {
 	std::transform(str.begin(), str.end(), str.begin(), [](uint8_t c) { return std::tolower(c); });
+}
+
+void trimString(std::string& str, const char* chars)
+{
+	str.erase(0, str.find_first_not_of(chars));
+	str.erase(str.find_last_not_of(chars) + 1);
+}
+
+std::string getLangString(bool path)
+{
+	if (path) {
+		switch (d2::getLangId()) {
+			case LANG_ESP: return "esp";
+			case LANG_DEU: return "deu";
+			case LANG_FRA: return "fra";
+			case LANG_POR: return "por";
+			case LANG_ITA: return "ita";
+			case LANG_JPN: return "jpn";
+			case LANG_KOR: return "kor";
+			case LANG_SIN: return "sin";
+			case LANG_CHI: return "chi";
+			case LANG_POL: return "pol";
+			case LANG_RUS: return "rus";
+		}
+		return "eng";
+	}
+
+	switch (d2::getLangId()) {
+		case LANG_ESP: return "Spanish";
+		case LANG_DEU: return "German";
+		case LANG_FRA: return "French";
+		case LANG_POR: return "Portuguese";
+		case LANG_ITA: return "Italian";
+		case LANG_JPN: return "Japanese";
+		case LANG_KOR: return "Korean";
+		case LANG_SIN: return "Singaporean";
+		case LANG_CHI: return "Chinese";
+		case LANG_POL: return "Polish";
+		case LANG_RUS: return "Russian";
+	}
+	return "English";
 }
 
 Version getVersion()
@@ -109,7 +190,7 @@ Version getVersion()
 	ss << ((ver_info->dwFileVersionLS >> 16) & 0xffff) << ".";
 	ss << ((ver_info->dwFileVersionLS >>  0) & 0xffff);
 
-	if (ss.str() == "1.0.9.22" ) version = Version::V_109d;
+	     if (ss.str() == "1.0.9.22" ) version = Version::V_109d;
 	else if (ss.str() == "1.0.10.39") version = Version::V_110;
 	else if (ss.str() == "1.0.11.45") version = Version::V_111;
 	else if (ss.str() == "1.0.11.46") version = Version::V_111b;
@@ -126,16 +207,17 @@ std::string getVersionString()
 {
 	// clang-format off
 	switch (getVersion()) {
-	case Version::V_109d: return "1.09d";
-	case Version::V_110: return "1.10";
-	case Version::V_111: return "1.11";
-	case Version::V_111b: return "1.11b";
-	case Version::V_112: return "1.12";
-	case Version::V_113c: return "1.13c";
-	case Version::V_113d: return "1.13d";
-	case Version::V_114d: return "1.14d";
+		case Version::V_109d: return "1.09d";
+		case Version::V_110:  return "1.10";
+		case Version::V_111:  return "1.11";
+		case Version::V_111b: return "1.11b";
+		case Version::V_112:  return "1.12";
+		case Version::V_113c: return "1.13c";
+		case Version::V_113d: return "1.13d";
+		case Version::V_114d: return "1.14d";
 	}
 	// clang-format on
+
 	return "Unknown";
 }
 
@@ -144,16 +226,16 @@ Offset getVersionOffset(OffsetDefault def_offset, Offset v109d, Offset v110, Off
 	Offset offset;
 	// clang-format off
 	switch (getVersion()) {
-	case Version::V_109d: offset = v109d; break;
-	case Version::V_110: offset = v110; break;
-	case Version::V_111: offset = v111; break;
-	case Version::V_111b: offset = v111b; break;
-	case Version::V_112: offset = v112; break;
-	case Version::V_113c: offset = v113c; break;
-	case Version::V_113d: offset = v113d; break;
-	case Version::V_114d: offset = v114d;
-		if (!offset.module)
-			offset.module = EXE_GAME;
+		case Version::V_109d: offset = v109d; break;
+		case Version::V_110:  offset = v110;  break;
+		case Version::V_111:  offset = v111;  break;
+		case Version::V_111b: offset = v111b; break;
+		case Version::V_112:  offset = v112;  break;
+		case Version::V_113c: offset = v113c; break;
+		case Version::V_113d: offset = v113d; break;
+		case Version::V_114d: offset = v114d;
+			if (!offset.module)
+				offset.module = EXE_GAME;
 		break;
 	}
 	// clang-format on
@@ -321,6 +403,7 @@ ImageData loadImage(const std::string& file_path, bool flipped)
 	if (buffer.size) {
 		stbi_set_flip_vertically_on_load(flipped);
 		image.data = stbi_load_from_memory(buffer.data, buffer.size, &image.width, &image.height, &image.bit, 4);
+		delete[] buffer.data;
 	}
 
 	return image;

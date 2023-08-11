@@ -26,20 +26,26 @@ uint32_t mpqLoad(const char* mpqfile);
 glm::ivec2 getCursorPos();
 bool isPerspective();
 bool isEscMenuOpen();
+bool isLangCJK(uint32_t lang_id);
 
 UnitAny* getPlayerUnit();
 UnitAny* findUnit(uint32_t type_id);
+
 DWORD getUnitID(UnitAny* unit);
 DWORD getUnitFlag(UnitAny* unit);
 Path* getUnitPath(UnitAny* unit);
 StaticPath* getUnitStaticPath(UnitAny* unit);
 uint32_t getUnitStat(UnitAny* unit, uint32_t stat);
 UnitAny* getSelectedItem();
+
 bool isUnitDead(UnitAny* unit);
+char* getPlayerName(UnitAny* unit);
 MonsterType getMonsterType(UnitAny* unit);
 wchar_t* getMonsterName(UnitAny* unit);
-ItemQuality getItemQuality(UnitAny* unit);
 bool isMercUnit(UnitAny* unit);
+
+ItemQuality getItemQuality(UnitAny* unit);
+BYTE getItemLocation(UnitAny* unit);
 
 CellFile* getCellFile(CellContext* cell);
 DWORD getCellNo(CellContext* cell);
@@ -48,6 +54,7 @@ void gameDrawBegin();
 void automapDrawBegin();
 void automapDrawEnd();
 void uiDrawBegin();
+void uiDrawCursorItem();
 void uiDrawEnd();
 
 void __stdcall drawImageHooked(CellContext* cell, int x, int y, uint32_t gamma, int draw_mode, uint8_t* palette);
@@ -80,6 +87,7 @@ void rectangledTextEnd();
 void unitHoverText();
 void altItemsText();
 void drawRectFrame();
+void drawUnitHealthBar();
 
 void loadUIImage();
 void drawSubTextA();

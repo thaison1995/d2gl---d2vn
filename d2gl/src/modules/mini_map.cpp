@@ -19,35 +19,36 @@
 #include "pch.h"
 #include "mini_map.h"
 #include "d2/common.h"
+#include "hd_text.h"
 
 namespace d2gl::modules {
 
 MiniMap::MiniMap()
 {
-	m_bg = std::make_unique<Object>(m_pos, m_size);
-	m_bg->setColor(0x000000AA, 1);
-	m_bg->setColor(0x222222DD, 2);
-	m_bg->setFlags({ 2, 2, 0, 0 });
-
-	m_map = std::make_unique<Object>(m_pos, m_size);
-	m_map->setFlags({ 5, 0, 0, 0 });
+	m_map = std::make_unique<Object>();
+	m_bg = std::make_unique<Object>();
+	m_bg->setColor(0x00000099, 1);
+	m_bg->setColor(0x222222EE, 2);
 }
 
 void MiniMap::resize()
 {
-	m_size = { 200.0f, 140.0f };
-	m_pos = { App.game.size.x - m_size.x - 5.0f, 5.0f };
-
 	const glm::vec2 zoom = App.viewport.scale;
-	float r_x = ((float)App.game.size.x / zoom.x - m_size.x) / 2 / ((float)App.game.size.x / zoom.x);
-	float r_y = ((float)App.game.size.y / zoom.y - m_size.y) / 2 / ((float)App.game.size.y / zoom.y);
+	const glm::vec2 tex_size = { (float)App.game.size.x, (float)App.game.size.y };
 
-	m_bg->setSize(m_size);
+	glm::vec2 padding = 3.0f / zoom;
+	m_size = { (float)App.mini_map.width.value, (float)App.mini_map.height.value };
+	m_pos = { (float)App.game.size.x - m_size.x - 5.0f - padding.x * 2.0f, 18.0f };
+
+	float r_x = (tex_size.x / zoom.x - m_size.x) / 2 / (tex_size.x / zoom.x);
+	float r_y = (tex_size.y / zoom.y - m_size.y) / 2 / (tex_size.y / zoom.y);
+
+	m_bg->setSize(m_size + padding * 2.0f);
+	m_bg->setExtra(m_size + padding * 2.0f);
 	m_bg->setPosition(m_pos);
-	m_bg->setExtra(m_size);
 
 	m_map->setSize(m_size);
-	m_map->setPosition(m_pos);
+	m_map->setPosition(m_pos + padding);
 	m_map->setTexCoord({ r_x, r_y, 1.0f - r_x, 1.0f - r_y });
 }
 
@@ -56,23 +57,24 @@ void MiniMap::draw()
 	static wchar_t time_str[20] = { 0 };
 	static tm gmt_time;
 
-	if (*d2::screen_shift == 0) {
-		App.context->pushObject(m_bg);
-		App.context->pushObject(m_map);
+	if (*d2::screen_shift == SCREENPANEL_NONE) {
+		if (!d2::isEscMenuOpen() && !*d2::automap_on) {
+			m_bg->setFlags(2, 3, 100);
+			m_map->setFlags(5, 0, 100);
+			App.context->pushObject(m_bg);
+			App.context->pushObject(m_map);
+		}
 
-		if (App.hd_text) {
+		if (App.hd_text.active) {
 			time_t now = time(0);
 			localtime_s(&gmt_time, &now);
-			swprintf_s(time_str, L"%.2d:%.2d", gmt_time.tm_hour, gmt_time.tm_min);
+			swprintf_s(time_str, L" | ÿc\x34%.2d:%.2d", gmt_time.tm_hour, gmt_time.tm_min);
 
-			d2::setTextSizeHooked(99);
-
-			int y_offset = 20;
-			if (App.mini_map.text_below) {
-				y_offset += 140;
-			}
-
-			d2::drawNormalTextHooked(time_str, App.game.size.x - 200, y_offset, 4, 0);
+			const auto old_size = modules::HDText::Instance().getTextSize();
+			d2::setTextSizeHooked(19);
+			m_time_width = d2::getNormalTextWidthHooked(time_str);
+			d2::drawNormalTextHooked(time_str, App.game.size.x - m_time_width - 5, 13, 5, 0);
+			d2::setTextSizeHooked(old_size);
 		}
 	}
 }
