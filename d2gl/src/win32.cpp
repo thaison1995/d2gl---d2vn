@@ -69,7 +69,7 @@ int WINAPI ShowCursor(BOOL bShow)
 
 BOOL WINAPI SetCursorPos(int X, int Y)
 {
-	if (App.hwnd) {
+	if (App.hwnd && !App.cursor.unlock) {
 		POINT pt = { (LONG)((float)X * App.cursor.scale.x), (LONG)((float)Y * App.cursor.scale.y) };
 		pt.x += App.viewport.offset.x;
 		pt.y += App.viewport.offset.y;
@@ -138,9 +138,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			App.window.centered = false;
 
 			if (Menu::instance().isVisible()) {
-				App.window.position.x = rect->left;
-				App.window.position.y = rect->top;
-				App.window.centered = false;
+				auto option = Menu::instance().getOption();
+				option->window.position.x = rect->left;
+				option->window.position.y = rect->top;
+				option->window.centered = false;
+				option->pos_changed = true;
 			}
 			return DefWindowProc(hWnd, uMsg, wParam, lParam);
 		}
@@ -175,11 +177,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 
 		case WM_ACTIVATEAPP: {
+			const bool fps_capped = !App.vsync && App.foreground_fps.active;
+
 			if (wParam) {
-				App.context->setFpsLimit(App.foreground_fps.active, App.foreground_fps.range.value);
+				App.context->setFpsLimit(fps_capped, App.foreground_fps.range.value);
 				CallWindowProcA(App.wndproc, hWnd, WM_SYSKEYUP, VK_MENU, 0);
 			} else {
-				App.context->setFpsLimit(App.background_fps.active, App.background_fps.range.value);
+				App.context->setFpsLimit(App.background_fps.active || fps_capped, App.background_fps.active ? App.background_fps.range.value : App.foreground_fps.range.value);
+				if (App.window.fullscreen && App.window.auto_minimize)
+					PostMessage(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
 				setCursorUnlock();
 			}
 			return 0;
@@ -231,16 +237,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					return 0;
 				}
 				if (Menu::instance().isVisible()) {
-					if (wParam == VK_ESCAPE) {
-						Menu::instance().toggle();
-						setCursorLock();
-						return 0;
-					}
-					if (wParam >= 0x30 && wParam <= 0x39)
+					if (wParam == VK_ESCAPE || (wParam >= 0x30 && wParam <= 0x39))
 						return 0;
 				}
 			}
 			break;
+		}
+		case WM_KEYUP: {
+			if (Menu::instance().isVisible()) {
+				if (wParam == VK_ESCAPE) {
+					Menu::instance().toggle();
+					setCursorLock();
+					return 0;
+				}
+				if (wParam >= 0x30 && wParam <= 0x39)
+					return 0;
+			}
 		}
 
 		case WM_LBUTTONUP:
@@ -251,7 +263,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			if (!App.cursor.locked) {
 				setCursorLock();
-				return 0;
+				if (!App.cursor.unlock)
+					return 0;
 			}
 
 			[[fallthrough]];
@@ -270,7 +283,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (Menu::instance().isVisible())
 				return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
-			if (!App.cursor.locked)
+			if (!App.cursor.unlock && !App.cursor.locked)
 				return 0;
 
 			int x = GET_X_LPARAM(lParam);
@@ -278,7 +291,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			x = (int)((float)glm::max(x - App.viewport.offset.x, 0) * App.cursor.unscale.x);
 			y = (int)((float)glm::max(y - App.viewport.offset.y, 0) * App.cursor.unscale.y);
-
 			x = glm::min(x, (int)App.game.size.x);
 			y = glm::min(y, (int)App.game.size.y);
 
@@ -315,8 +327,6 @@ void setWindow(HWND hwnd)
 	App.hdc = GetDC(App.hwnd);
 	win32::toggleDarkmode();
 
-	App.wndproc = (WNDPROC)SetWindowLongA(App.hwnd, GWL_WNDPROC, (LONG)WndProc);
-
 	App.window.style = GetWindowLong(App.hwnd, GWL_STYLE);
 	App.window.style &= ~(WS_POPUP | WS_GROUP | WS_DLGFRAME | WS_CLIPSIBLINGS | WS_TABSTOP);
 	App.window.style |= WS_OVERLAPPEDWINDOW & ~(WS_SIZEBOX | WS_MAXIMIZEBOX);
@@ -324,21 +334,26 @@ void setWindow(HWND hwnd)
 
 void setWindowRect()
 {
-	RECT wr = { 0 };
-	int cx = GetSystemMetrics(SM_CXSCREEN);
-	int cy = GetSystemMetrics(SM_CYSCREEN);
+	HMONITOR monitor = MonitorFromWindow(App.hwnd, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO monitor_info;
+	monitor_info.cbSize = sizeof(MONITORINFO);
+
+	GetMonitorInfo(monitor, &monitor_info);
+	RECT wr = monitor_info.rcMonitor;
+	LONG screen_w = wr.right - wr.left;
+	LONG screen_h = wr.bottom - wr.top;
 
 	if (!App.window.fullscreen) {
-		if (App.window.size.x > (DWORD)cx)
-			App.window.size.x = cx;
+		if (App.window.size.x > (DWORD)screen_w)
+			App.window.size.x = screen_w;
 
-		if (App.window.size.y > (DWORD)cy)
-			App.window.size.y = cy;
+		if (App.window.size.y > (DWORD)screen_h)
+			App.window.size.y = screen_h;
 
-		int x = App.window.centered ? (cx / 2) - (App.window.size.x / 2) : App.window.position.x;
-		int y = App.window.centered ? (cy / 2) - (App.window.size.y / 2) : App.window.position.y;
-		x = (x > cx - 50) ? cx - 50 : x;
-		y = (y > cy - 50) ? cy - 50 : y;
+		int x = App.window.centered ? wr.left + (screen_w / 2) - (App.window.size.x / 2) : App.window.position.x;
+		int y = App.window.centered ? wr.top + (screen_h / 2) - (App.window.size.y / 2) : App.window.position.y;
+		x = (x > wr.left + screen_w - 50) ? wr.left + screen_w - 50 : x;
+		y = (y > wr.top + screen_h - 50) ? wr.top + screen_h - 50 : y;
 		wr = { x, y, (LONG)App.window.size.x + x, (LONG)App.window.size.y + y };
 
 		SetWindowLong(App.hwnd, GWL_STYLE, App.window.style);
@@ -356,9 +371,7 @@ void setWindowRect()
 		trace_log("Switched to windowed mode: %d x %d", App.window.size.x, App.window.size.y);
 	} else {
 		SetWindowLong(App.hwnd, GWL_STYLE, App.window.style & ~WS_OVERLAPPEDWINDOW);
-
-		App.window.size = { cx, cy };
-		wr = { 0, 0, cx, cy };
+		App.window.size = { screen_w, screen_h };
 
 		SetWindowPos_Og(App.hwnd, HWND_NOTOPMOST, wr.left, wr.top, (wr.right - wr.left), (wr.bottom - wr.top), 0);
 		SetWindowPos_Og(App.hwnd, HWND_NOTOPMOST, wr.left, wr.top, (wr.right - wr.left), (wr.bottom - wr.top), SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
@@ -393,11 +406,13 @@ void setWindowMetrics()
 void setCursorLock()
 {
 	if (!App.cursor.locked) {
-		RECT rc = { App.viewport.offset.x, App.viewport.offset.y, (int)App.viewport.size.x + App.viewport.offset.x, (int)App.viewport.size.y + App.viewport.offset.y };
-		MapWindowPoints(App.hwnd, NULL, (LPPOINT)&rc, 2);
+		if (!App.cursor.unlock) {
+			RECT rc = { App.viewport.offset.x, App.viewport.offset.y, (int)App.viewport.size.x + App.viewport.offset.x, (int)App.viewport.size.y + App.viewport.offset.y };
+			MapWindowPoints(App.hwnd, NULL, (LPPOINT)&rc, 2);
+			ClipCursor(&rc);
+		}
 
-		ClipCursor(&rc);
-		ShowCursor_Og(false);
+		while(ShowCursor_Og(false) >= 0);
 		App.cursor.locked = true;
 	}
 }
@@ -405,8 +420,10 @@ void setCursorLock()
 void setCursorUnlock()
 {
 	if (App.cursor.locked) {
-		ClipCursor(NULL);
-		ShowCursor_Og(true);
+		if (!App.cursor.unlock)
+			ClipCursor(NULL);
+		
+		while(ShowCursor_Og(true) <= 0);
 		App.cursor.locked = false;
 	}
 }
@@ -418,6 +435,7 @@ void windowResize()
 
 	setWindowMetrics();
 	App.window.resized = true;
+	App.context->getCommandBuffer()->resize();
 
 	if (cursor_lock)
 		setCursorLock();
@@ -447,11 +465,13 @@ void setDPIAwareness()
 	if (info.dwMajorVersion >= HIBYTE(_WIN32_WINNT_WIN10)) { // Win10+
 		typedef BOOL(WINAPI* SetProcessDpiAwareness_t)(DPI_AWARENESS_CONTEXT);
 		SetProcessDpiAwareness_t SetProcessDpiAwareness = (SetProcessDpiAwareness_t)helpers::getProcOffset(DLL_USER32, "SetProcessDpiAwarenessContext");
-		SetProcessDpiAwareness(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+		if (SetProcessDpiAwareness)
+			SetProcessDpiAwareness(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	} else if (info.dwMajorVersion == HIBYTE(_WIN32_WINNT_WINBLUE) && info.dwMinorVersion == LOBYTE(_WIN32_WINNT_WINBLUE)) { // Win8.1
 		typedef HRESULT(WINAPI* SetProcessDpiAwareness_t)(PROCESS_DPI_AWARENESS);
 		SetProcessDpiAwareness_t SetProcessDpiAwareness = (SetProcessDpiAwareness_t)helpers::getProcOffset(DLL_SHCORE, "SetProcessDpiAwareness");
-		SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
+		if (SetProcessDpiAwareness)
+			SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
 	} else
 		SetProcessDPIAware();
 }

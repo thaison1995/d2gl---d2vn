@@ -24,6 +24,7 @@ class MiniMap {
 	std::unique_ptr<Object> m_bg, m_map;
 	glm::vec2 m_pos = { 0.0f, 0.0f };
 	glm::vec2 m_size = { 0.0f, 0.0f };
+	uint32_t m_time_width = 0;
 
 	MiniMap();
 	~MiniMap() = default;
@@ -34,6 +35,9 @@ public:
 		static MiniMap instance;
 		return instance;
 	}
+
+	inline bool isActive() { return ISGLIDE3X() && App.mini_map.active; }
+	inline uint32_t getTimeWidth() const { return m_time_width; }
 
 	void resize();
 	void draw();

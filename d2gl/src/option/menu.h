@@ -29,19 +29,31 @@ enum class Color {
 	Gray,
 };
 
+struct Options {
+	bool vsync = false;
+	bool unlock_cursor = false;
+	D2GLApp::Window window;
+	D2GLApp::ForegroundFPS foreground_fps;
+	D2GLApp::BackgroundFPS background_fps;
+	bool pos_changed = false;
+};
+
 class Menu {
 	bool m_visible = false;
 	bool m_visible_t = false;
+	bool m_closing = false;
+	bool m_changed = false;
+	bool m_opt_changed = false;
 	std::unordered_map<int, ImFont*> m_fonts;
 	std::unordered_map<Color, ImVec4> m_colors;
-	ImGuiCond window_pos_cond;
+	Options m_options;
+	bool m_ignore_font = false;
 
 	Menu();
 	~Menu() = default;
 
 	void updateSelectedQualityPreset();
 	void applyQualityPreset();
-	void applyWindowChanges();
 	bool tabBegin(const char* title, int tab_num, int* active_tab);
 	void tabEnd();
 
@@ -51,12 +63,13 @@ class Menu {
 	bool drawNav(const char* btn_label);
 
 	template <typename T>
-	bool drawCombo(const char* title, Select<T>* select, const char* desc, const char* btn_label, int* opt);
+	bool drawCombo(const char* title, Select<T>* select, const char* desc, bool have_btn, int* opt, int size = 17);
 	bool drawCheckbox(const char* title, bool* option, const char* desc, bool* opt);
 	template <typename T>
 	bool drawSlider(const std::string& id, const char* title, Range<T>* range, const char* format, const char* desc, T* opt);
 	void drawInput2(const std::string& id, const char* desc, glm::ivec2* input, glm::ivec2 min = { 0, 0 }, glm::ivec2 max = { 10000, 10000 });
 
+	bool drawButton(const char* label, const ImVec2& btn_size = { 0.0f, 0.0f }, int size = 17);
 	void drawSeparator(float y_padd = 5.0f, float alpha = 1.0f);
 	void drawLabel(const char* title, const ImVec4& color, int size = 17);
 	void drawDescription(const char* desc, const ImVec4& color, int size = 14);
@@ -69,9 +82,11 @@ public:
 	}
 
 	void toggle(bool force = false);
+	void check();
 	void draw();
 
 	inline bool isVisible() { return m_visible; }
+	inline Options* getOption() { return &m_options; }
 };
 
 }

@@ -50,6 +50,7 @@ enum class DrawStage : uint8_t {
 	UI,
 	Map,
 	HUD,
+	CursorItem,
 	Cursor,
 };
 
@@ -67,16 +68,6 @@ enum class D2DrawFn {
 	NormalTextEx,
 	FramedText,
 	RectangledText,
-};
-
-struct Vertex {
-	glm::vec2 position;
-	glm::vec2 tex_coord;
-	uint32_t color1;
-	uint32_t color2;
-	glm::vec<2, int16_t> texture_ids;
-	glm::vec<4, int8_t> flags;
-	glm::vec2 extra;
 };
 
 struct Offset {
@@ -122,7 +113,5 @@ struct Range {
 	T min;
 	T max;
 };
-
-typedef void (*onStageChange_t)(void);
 
 }

@@ -76,6 +76,17 @@ __declspec(naked) void uiDrawBeginStub()
 	}
 }
 
+__declspec(naked) void uiDrawCursorItemStub()
+{
+	__asm
+	{
+		pushad
+		call uiDrawCursorItem
+		popad
+		ret
+	}
+}
+
 __declspec(naked) void uiDrawEndStub()
 {
 	__asm
@@ -297,6 +308,31 @@ __declspec(naked) void rectangledTextBeginStub()
 {
 	__asm
 	{
+		mov headsup_text_unit, edx
+		pushad
+		call rectangledTextBegin
+		popad
+		ret
+	}
+}
+
+__declspec(naked) void rectangledTextBeginStub110f()
+{
+	__asm
+	{
+		mov headsup_text_unit, ecx
+		pushad
+		call rectangledTextBegin
+		popad
+		ret
+	}
+}
+
+__declspec(naked) void rectangledTextBeginStub109d()
+{
+	__asm
+	{
+		mov headsup_text_unit, ebp
 		pushad
 		call rectangledTextBegin
 		popad
@@ -406,6 +442,62 @@ __declspec(naked) void altItemsTextStub109d()
 	}
 }
 
+__declspec(naked) void unitHoverBeginPatch()
+{
+	__asm
+	{
+		mov is_unit_hovered, 0x1
+		ret
+	}
+}
+
+__declspec(naked) void unitHoverMidPatch()
+{
+	__asm
+	{
+		mov is_unit_hovered, 0x2
+		ret
+	}
+}
+
+__declspec(naked) void unitHoverEndPatch()
+{
+	__asm
+	{
+		pushad
+		call drawUnitHealthBar
+		popad
+		ret
+	}
+}
+
+__declspec(naked) void drawInvItemPatch()
+{
+	__asm
+	{
+		mov currently_drawing_item, ebx
+		ret
+	}
+}
+
+__declspec(naked) void drawInvItemPatchEDI()
+{
+	__asm
+	{
+		mov currently_drawing_item, edi
+		ret
+	}
+}
+
+__declspec(naked) void drawInvItemPatchESI()
+{
+	__asm
+	{
+		mov currently_drawing_item, esi
+		ret
+	}
+}
+
 __declspec(naked) void loadUIImageStub()
 {
 	__asm
@@ -500,6 +592,7 @@ __declspec(naked) wchar_t* __fastcall getLevelName(int Level_no)
 		ret
 	}
 }
+
 // clang-format on
 
 }
