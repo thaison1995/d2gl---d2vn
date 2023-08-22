@@ -58,7 +58,7 @@ void MiniMap::draw()
 	static tm gmt_time;
 
 	if (*d2::screen_shift == SCREENPANEL_NONE) {
-		if (!d2::isEscMenuOpen() && !*d2::automap_on) {
+		if (!d2::isEscMenuOpen() && !*d2::help_menu_open && !*d2::automap_on) {
 			m_bg->setFlags(2, 3, 100);
 			m_map->setFlags(5, 0, 100);
 			App.context->pushObject(m_bg);

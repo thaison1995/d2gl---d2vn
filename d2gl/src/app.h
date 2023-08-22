@@ -142,15 +142,15 @@ struct D2GLApp {
 	} bloom;
 
 	struct {
-		bool active = false;
+		bool active = true;
 		Range<float> scale = { 1.0f, 0.8f, 1.2f };
 	} hd_text;
 
-	bool hd_cursor = false;
+	bool hd_cursor = true;
 	bool motion_prediction = false;
 	bool skip_intro = false;
 	bool no_pickup = false;
-	bool show_item_quantity = false;
+	bool show_item_quantity = true;
 	bool show_monster_res = false;
 	bool show_fps = false;
 
