@@ -117,7 +117,7 @@ struct D2GLApp {
 
 	struct {
 		Select<std::string> presets = {};
-		std::string preset = "bilinear.slangp";
+		std::string preset = "anti-aliasing\\reverse-aa.slangp";
 		int selected = 0;
 	} shader;
 
@@ -143,11 +143,11 @@ struct D2GLApp {
 
 	struct {
 		bool active = true;
-		Range<float> scale = { 1.0f, 0.8f, 1.2f };
+		Range<float> scale = { 1.0f, 0.8f, 1.0f };
 	} hd_text;
 
 	bool hd_cursor = true;
-	bool motion_prediction = false;
+	bool motion_prediction = true;
 	bool skip_intro = false;
 	bool no_pickup = false;
 	bool show_item_quantity = true;
