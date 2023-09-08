@@ -9,7 +9,25 @@ int Config::GetInt(std::string sectionKey, std::string key, int def, int min = I
 {
 	int val = def;
 	if (yaml[sectionKey][key]) {
-		val = yaml[sectionKey][key].as<int>();
+		if (yaml[sectionKey][key].IsScalar()) {
+			try {
+				val = yaml[sectionKey][key].as<int>();
+			} catch (const YAML::TypedBadConversion<int>& e) {
+				// Handle conversion error here
+				error_log("Error converting scalar config key to an integer, check your values!");
+			}
+		} else {
+			// If it's not a scalar, try to use it as a string and convert
+			try {
+				val = std::stoi(yaml[sectionKey][key].as<std::string>());
+			} catch (const std::exception& e) {
+				// Handle string-to-integer conversion error here
+				error_log("Error converting string config key to an integer, check your values!");
+			}
+		}
+	} else {
+		// Key not found in the YAML file
+		error_log("No Key value found in your config file! Check your defaults!");
 	}
 
 	if (min != INT_MIN && val < min) {
