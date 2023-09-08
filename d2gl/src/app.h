@@ -117,7 +117,7 @@ struct D2GLApp {
 
 	struct {
 		Select<std::string> presets = {};
-		std::string preset = "anti-aliasing\\reverse-aa.slangp";
+		std::string preset = "anti-aliasing\\advanced-aa.slangp";
 		int selected = 0;
 	} shader;
 
