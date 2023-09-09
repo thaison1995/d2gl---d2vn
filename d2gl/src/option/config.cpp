@@ -9,25 +9,13 @@ int Config::GetInt(std::string sectionKey, std::string key, int def, int min = I
 {
 	int val = def;
 	if (yaml[sectionKey][key]) {
-		if (yaml[sectionKey][key].IsScalar()) {
-			try {
-				val = yaml[sectionKey][key].as<int>();
-			} catch (const YAML::TypedBadConversion<int>& e) {
-				// Handle conversion error here
-				error_log("Error converting scalar config key to an integer, check your values!");
-			}
-		} else {
-			// If it's not a scalar, try to use it as a string and convert
-			try {
-				val = std::stoi(yaml[sectionKey][key].as<std::string>());
-			} catch (const std::exception& e) {
-				// Handle string-to-integer conversion error here
-				error_log("Error converting string config key to an integer, check your values!");
-			}
+		try {
+			val = yaml[sectionKey][key].as<int>();
+		} 
+		catch (const YAML::TypedBadConversion<int>& e) {
+			// Handle conversion error here
+			error_log("Error converting int config key '%s' in section '%s', check your values! Exception: %s", key.c_str(), sectionKey.c_str(), e.what());
 		}
-	} else {
-		// Key not found in the YAML file
-		error_log("No Key value found in your config file! Check your defaults!");
 	}
 
 	if (min != INT_MIN && val < min) {
@@ -45,7 +33,13 @@ float Config::GetFloat(std::string sectionKey, std::string key, float def, float
 {
 	float val = def;
 	if (yaml[sectionKey][key]) {
-		val = yaml[sectionKey][key].as<float>();
+		try {
+			val = yaml[sectionKey][key].as<float>();
+		} 
+		catch (const YAML::TypedBadConversion<float>& e) {
+			// Handle conversion error here
+			error_log("Error converting float config key '%s' in section '%s', check your values! Exception: %s", key.c_str(), sectionKey.c_str(), e.what());
+		}
 	}
 
 	if (val < min) {
@@ -63,7 +57,13 @@ bool Config::GetBool(std::string sectionKey, std::string key, bool def)
 {
 	bool val = def;
 	if (yaml[sectionKey][key]) {
-		val = yaml[sectionKey][key].as<bool>();
+		try {
+			val = yaml[sectionKey][key].as<bool>();		
+		} 
+		catch (const YAML::TypedBadConversion<bool>& e) {
+			// Handle conversion error here
+			error_log("Error converting bool config key '%s' in section '%s', check your values! Exception: %s", key.c_str(), sectionKey.c_str(), e.what());
+		}
 	}
 	return val;
 }
@@ -72,7 +72,12 @@ std::string Config::GetString(std::string sectionKey, std::string key, const std
 {
 	std::string val = def;
 	if (yaml[sectionKey][key]) {
-		val = yaml[sectionKey][key].as<std::string>();
+		try {
+			val = yaml[sectionKey][key].as<std::string>();		
+		} catch (const std::exception& e) {
+			// Handle conversion error here
+			error_log("Error converting string config key '%s' in section '%s', check your values! Exception: %s", key.c_str(), sectionKey.c_str(), e.what());
+		}
 	}
 	return val;
 }
