@@ -84,70 +84,73 @@ std::string Config::GetString(std::string sectionKey, std::string key, const std
 
 void Config::SaveConfig()
 {
+	yaml = YAML::Node(YAML::NodeType::Map);
+
 	// Screen Tab
 	yaml["screen"] = YAML::Node(YAML::NodeType::Map);
 	YAML::Node yamlScreen = yaml["screen"];
-	yamlScreen["window_size_width"] = App.window.size.x;
-	yamlScreen["window_size_height"] = App.window.size.y;
-	yamlScreen["window_centered"] = App.window.centered;
-	yamlScreen["window_position_x"] = App.window.position.x;
-	yamlScreen["window_position_y"] = App.window.position.y;
-	yamlScreen["unlock_cursor"] = App.cursor.unlock;
-	yamlScreen["window_fullscreen"] = App.window.fullscreen;
-	yamlScreen["window_vsync"] = App.vsync;
-	yamlScreen["foreground_fps_active"] = App.foreground_fps.active;
-	yamlScreen["foreground_fps_value"] = App.foreground_fps.range.value;
-	yamlScreen["background_fps_active"] = App.background_fps.active;
-	yamlScreen["background_fps_value"] = App.background_fps.range.value;
-	yamlScreen["auto_minimize"] = App.window.auto_minimize;
-	yamlScreen["window_dark_mode"] = App.window.dark_mode;
+	yamlScreen["window_size_width"] = std::to_string(App.window.size.x);
+	yamlScreen["window_size_height"] = std::to_string(App.window.size.y);
+	yamlScreen["window_centered"] = std::to_string(App.window.centered);
+	yamlScreen["window_position_x"] = std::to_string(App.window.position.x);
+	yamlScreen["window_position_y"] = std::to_string(App.window.position.y);
+	yamlScreen["unlock_cursor"] = std::to_string(App.cursor.unlock);
+	yamlScreen["window_fullscreen"] = std::to_string(App.window.fullscreen);
+	yamlScreen["window_vsync"] = std::to_string(App.vsync);
+	yamlScreen["foreground_fps_active"] = std::to_string(App.foreground_fps.active);
+	yamlScreen["foreground_fps_value"] = std::to_string(App.foreground_fps.range.value);
+	yamlScreen["background_fps_active"] = std::to_string(App.background_fps.active);
+	yamlScreen["background_fps_value"] = std::to_string(App.background_fps.range.value);
+	yamlScreen["auto_minimize"] = std::to_string(App.window.auto_minimize);
+	yamlScreen["window_dark_mode"] = std::to_string(App.window.dark_mode);
 
 	// Graphics Tab
 	yaml["graphics"] = YAML::Node(YAML::NodeType::Map);
 	YAML::Node yamlGraphics = yaml["graphics"];
 	yamlGraphics["shader_preset"] = App.shader.preset;
-	yamlGraphics["sharpen"] = App.sharpen.active;
-	yamlGraphics["sharpen_strength"] = App.sharpen.strength.value;
-	yamlGraphics["sharpen_clamp"] = App.sharpen.clamp.value;
-	yamlGraphics["sharpen_radius"] = App.sharpen.radius.value;
-	yamlGraphics["fxaa"] = App.fxaa.active;
-	yamlGraphics["fxaa_preset"] = App.fxaa.presets.selected;
-	yamlGraphics["lut"] = App.lut.selected;
-	yamlGraphics["bloom"] = App.bloom.active;
-	yamlGraphics["bloom_exposure"] = App.bloom.exposure.value;
-	yamlGraphics["bloom_gamma"] = App.bloom.gamma.value;
-	yamlGraphics["stretched_horizontal"] = App.viewport.stretched.x;
-	yamlGraphics["stretched_vertical"] = App.viewport.stretched.y;
+	yamlGraphics["sharpen"] = std::to_string(App.sharpen.active);
+	yamlGraphics["sharpen_strength"] = std::to_string(App.sharpen.strength.value);
+	yamlGraphics["sharpen_clamp"] = std::to_string(App.sharpen.clamp.value);
+	yamlGraphics["sharpen_radius"] = std::to_string(App.sharpen.radius.value);
+	yamlGraphics["fxaa"] = std::to_string(App.fxaa.active);
+	yamlGraphics["fxaa_preset"] = std::to_string(App.fxaa.presets.selected);
+	yamlGraphics["lut"] = std::to_string(App.lut.selected);
+	yamlGraphics["bloom"] = std::to_string(App.bloom.active);
+	yamlGraphics["bloom_exposure"] = std::to_string(App.bloom.exposure.value);
+	yamlGraphics["bloom_gamma"] = std::to_string(App.bloom.gamma.value);
+	yamlGraphics["stretched_horizontal"] = std::to_string(App.viewport.stretched.x);
+	yamlGraphics["stretched_vertical"] = std::to_string(App.viewport.stretched.y);
 
 	// Features Tab
 	yaml["features"] = YAML::Node(YAML::NodeType::Map);
 	YAML::Node yamlFeatures = yaml["features"];
-	yamlFeatures["hd_cursor"] = App.hd_cursor;
-	yamlFeatures["hd_text"] = App.hd_text.active;
-	yamlFeatures["hd_text_scale"] = App.hd_text.scale.value;
-	yamlFeatures["mini_map"] = App.mini_map.active;
-	yamlFeatures["mini_map_text_over"] = App.mini_map.text_over;
-	yamlFeatures["mini_map_width"] = App.mini_map.width.value;
-	yamlFeatures["mini_map_height"] = App.mini_map.height.value;
-	yamlFeatures["motion_prediction"] = App.motion_prediction;
-	yamlFeatures["skip_intro"] = App.skip_intro;
-	yamlFeatures["no_pickup"] = App.no_pickup;
-	yamlFeatures["show_item_quantity"] = App.show_item_quantity;
-	yamlFeatures["show_fps"] = App.show_fps;
+	yamlFeatures["hd_cursor"] = std::to_string(App.hd_cursor);
+	yamlFeatures["hd_text"] = std::to_string(App.hd_text.active);
+	yamlFeatures["hd_text_scale"] = std::to_string(App.hd_text.scale.value);
+	yamlFeatures["mini_map"] = std::to_string(App.mini_map.active);
+	yamlFeatures["mini_map_text_over"] = std::to_string(App.mini_map.text_over);
+	yamlFeatures["mini_map_width"] = std::to_string(App.mini_map.width.value);
+	yamlFeatures["mini_map_height"] = std::to_string(App.mini_map.height.value);
+	yamlFeatures["motion_prediction"] = std::to_string(App.motion_prediction);
+	yamlFeatures["skip_intro"] = std::to_string(App.skip_intro);
+	yamlFeatures["no_pickup"] = std::to_string(App.no_pickup);
+	yamlFeatures["show_item_quantity"] = std::to_string(App.show_item_quantity);
+	yamlFeatures["show_fps"] = std::to_string(App.show_fps);
 	// yamlFeatures["hd_orbs"] = App.hd_orbs.active;
 	// yamlFeatures["hd_orbs_centered"] = App.hd_orbs.centered;
 
 	// Other
 	yaml["other"] = YAML::Node(YAML::NodeType::Map);
 	YAML::Node yamlOther = yaml["other"];
-	yamlOther["gl_ver_major"] = (int)App.gl_ver.x;
-	yamlOther["gl_ver_minor"] = (int)App.gl_ver.y;
-	yamlOther["use_compute_shader"] = App.use_compute_shader;
-	yamlOther["frame_latency"] = App.frame_latency;
+	yamlOther["gl_ver_major"] = std::to_string((int)App.gl_ver.x);
+	yamlOther["gl_ver_minor"] = std::to_string((int)App.gl_ver.y);
+	yamlOther["use_compute_shader"] = std::to_string(App.use_compute_shader);
+	yamlOther["frame_latency"] = std::to_string(App.frame_latency);
 	yamlOther["load_dlls_early"] = App.dlls_early;
 	yamlOther["load_dlls_late"] = App.dlls_late;
 
-	std::ofstream fout(App.yaml_file);
+	std::ofstream fout;
+	fout.open(App.yaml_file, std::ofstream::out | std::ofstream::trunc);
 	fout << yaml;
 
 	fout.close();
