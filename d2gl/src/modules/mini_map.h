@@ -38,8 +38,6 @@ public:
 
 	inline bool isActive() 
 	{
-		return false;
-
 		return ISGLIDE3X() && App.mini_map.active; 
 	}
 	inline uint32_t getTimeWidth() const { return m_time_width; }

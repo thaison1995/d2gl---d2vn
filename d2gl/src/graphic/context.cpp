@@ -661,6 +661,30 @@ void Context::onShaderChange()
 	m_current_shader = App.shader.selected;
 }
 
+void LogText(const char* Msg...)
+{
+	va_list arguments;
+	va_start(arguments, Msg);
+
+	int len = _vscprintf(Msg, arguments) + 1;
+	char* text = new char[len];
+	vsprintf_s(text, len, Msg, arguments);
+	va_end(arguments);
+
+	char sTime[9] = {};
+	_strtime_s(sTime, 9);
+	char sDate[9] = {};
+	_strdate_s(sDate, 9);
+	FILE* plik = nullptr;
+	fopen_s(&plik, "D2GL.log", "a");
+	if (plik) 
+	{
+		fprintf(plik, "[%s][%s] %s\n", sDate, sTime, text);
+		fclose(plik);
+	}
+	delete[] text;
+}
+
 void Context::onStageChange()
 {
 	if (App.game.screen == GameScreen::Movie)
@@ -668,7 +692,7 @@ void Context::onStageChange()
 
 	switch (App.game.draw_stage) 
 	{
-		case DrawStage::World:
+		case DrawStage::World: 
 			break;
 		case DrawStage::UI:
 			if (ISGLIDE3X() && (App.bloom.active || App.lut.selected) && *d2::screen_shift != SCREENPANEL_BOTH) {

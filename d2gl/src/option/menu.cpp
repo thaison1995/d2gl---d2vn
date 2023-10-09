@@ -352,7 +352,7 @@ void Menu::draw()
 					modules::HDText::Instance().updateFontSize();
 			ImGui::EndDisabled();
 			drawSeparator();
-			/*ImGui::BeginDisabled(!ISGLIDE3X() || !App.mini_map.available);
+			ImGui::BeginDisabled(!ISGLIDE3X() || !App.mini_map.available);
 				drawCheckbox_m("Mini Map", App.mini_map.active, "Always on minimap widget.", mini_map)
 				{
 					d2::patch_minimap->toggle(App.mini_map.active);
@@ -368,9 +368,8 @@ void Menu::draw()
 					if (App.mini_map.active)
 						modules::MiniMap::Instance().resize();
 				ImGui::EndDisabled();
-			ImGui::EndDisabled();*/
-			/*drawSeparator();
-			ImGui::BeginDisabled(true);
+			ImGui::EndDisabled();
+			/*ImGui::BeginDisabled(true);
 				drawCheckbox_m("HD Orbs", App.hd_orbs.active, "High-definition life & mana orbs. (coming soon)", hd_orbs)
 					saveBool("Feature", "hd_orbs", App.hd_orbs.active);
 				ImGui::Spacing();
@@ -391,13 +390,19 @@ void Menu::draw()
 			drawSeparator();
 			drawCheckbox_m("No Pickup", App.no_pickup, "Auto /nopickup option on launch (exclude 1.09d).", no_pickup);
 			drawSeparator();
-			drawCheckbox_m("Show Monster Resistances", App.show_monster_res, "Show monster resistances on hp bar.", show_monster_res);
+			drawCheckbox_m("Show Monster Resistances", App.show_monster_res, "Show monster resistances.", show_monster_res);
+			ImGui::BeginDisabled(!App.show_monster_res);
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::SameLine(20.0f);
+				drawCheckbox_m("Show Monster Resist In HP Bar", App.show_monster_res_in_mon_hp_bar, "Show monster resistances in hp bar.", show_monster_res_in_mon_hp_bar);
+			ImGui::EndDisabled();
 			drawSeparator();
+			drawCheckbox_m("Show FPS", App.show_fps, "FPS Counter on bottom center.", show_fps);
 			//ImGui::BeginDisabled(true);
 			//drawCheckbox_m("Show Item Quantity", App.show_item_quantity, "Show item quantity on bottom left corner of icon.", show_item_quantity);
 			//ImGui::EndDisabled();
 			//drawSeparator();
-			//drawCheckbox_m("Show FPS", App.show_fps, "FPS Counter on bottom center.", show_fps);
 			childEnd();
 			tabEnd();
 		}

@@ -769,6 +769,8 @@ void HDText::loadUIImage()
 
 void HDText::startEntryText()
 {
+	return;
+
 	if (!isActive() || App.game.screen != GameScreen::InGame)
 		return;
 
@@ -790,6 +792,8 @@ void HDText::startEntryText()
 
 void HDText::drawEntryText()
 {
+	return;
+
 	if (App.game.screen != GameScreen::InGame || !m_entry_text_draw)
 		return;
 
@@ -827,6 +831,34 @@ void HDText::drawMonsterHealthBar(d2::UnitAny* unit)
 	if (!name)
 		return;
 
+	wchar_t wszName[1024] = { L'\0'};
+
+	wstring szRes = L"";
+	if (App.show_monster_res) {
+		int dr = d2::getUnitStat(unit, d2::STATS_DAMAGERESIST);
+		int mr = d2::getUnitStat(unit, d2::STATS_MAGICRESIST);
+		int fr = d2::getUnitStat(unit, d2::STATS_FIRERESIST);
+		int lr = d2::getUnitStat(unit, d2::STATS_LIGHTRESIST);
+		int cr = d2::getUnitStat(unit, d2::STATS_COLDRESIST);
+		int pr = d2::getUnitStat(unit, d2::STATS_POISONRESIST);
+		int lv = d2::getUnitStat(unit, d2::STATS_LEVEL);
+
+		if (dr | mr | fr | lr | cr | pr | lv) {
+
+			if (lv) szRes += L"ÿc0(Lv: ÿc4" + to_wstring(lv) + L"ÿc0)";
+			szRes += L"ÿc0(Res:";
+			if (dr) szRes += L"ÿc7" + wstring(L" D") + to_wstring(dr); // Golden
+			if (mr) szRes += L"ÿc8" + wstring(L" M") + to_wstring(mr); // Orange
+			if (fr) szRes += L"ÿc1" + wstring(L" F") + to_wstring(fr); // Red
+			if (lr) szRes += L"ÿc9" + wstring(L" L") + to_wstring(lr); // Light yellow
+			if (cr) szRes += L"ÿc3" + wstring(L" C") + to_wstring(cr); // Blue
+			if (pr) szRes += L"ÿc2" + wstring(L" P") + to_wstring(pr); // Green
+			szRes += L"ÿc0)";
+		}
+	}
+
+	swprintf_s(wszName, L"%s %s", name, (App.show_monster_res_in_mon_hp_bar) ? szRes.c_str() : L"");
+
 	const auto hp = d2::getUnitStat(unit, STAT_HP);
 	const auto max_hp = d2::getUnitStat(unit, STAT_MAXHP);
 	const auto type = d2::getMonsterType(unit);
@@ -842,16 +874,15 @@ void HDText::drawMonsterHealthBar(d2::UnitAny* unit)
 	else if (*d2::screen_shift == SCREENPANEL_LEFT)
 		center = (float)(*d2::screen_width / 4 * 3);
 
-	const auto text_size = font->getTextSize(name);
+	const auto text_size = font->getTextSize(wszName);
 	float hp_percent = (float)hp / (float)max_hp;
 
 	d2::StatList* pStatList = d2::D2COMMON_GetStateStatList(unit, 288);
-	if (pStatList) 
-	{
+	if (pStatList) {
 		const auto nhp = unit->v110.pMonsterDataD2VN->nHP;
 		const auto nmax_hp = unit->v110.pMonsterDataD2VN->nMaxHP;
 		hp_percent = (float)nhp / (float)nmax_hp;
-	} 
+	}
 
 	glm::vec2 bar_size = { 160.0f, 18.0f };
 	if (text_size.x + 40.0f > bar_size.x)
@@ -883,62 +914,17 @@ void HDText::drawMonsterHealthBar(d2::UnitAny* unit)
 		text_color = L'\x31';
 
 	glm::vec2 text_pos = { center - text_size.x / 2, bar_pos.y + 15.8f };
-	font->drawText(name, text_pos, g_text_colors.at(text_color));
+	font->drawText(wszName, text_pos, g_text_colors.at(text_color));
 	m_hovered_unit.color = 0;
 
-	if (App.show_monster_res) 
-	{
-		/*const auto s1 = d2::getUnitStat(unit, STAT_DMGREDUCTIONPCT);
-		const wchar_t* i1 = s1 >= 100 ? L"" : L"";
-		const auto s2 = d2::getUnitStat(unit, STAT_MAGICDMGREDUCTIONPCT);
-		const wchar_t* i2 = s2 >= 100 ? L"" : L"";
-		const auto s3 = d2::getUnitStat(unit, STAT_FIRERESIST);
-		const wchar_t* i3 = s3 >= 100 ? L"" : L"";
-		const auto s4 = d2::getUnitStat(unit, STAT_LIGHTNINGRESIST);
-		const wchar_t* i4 = s4 >= 100 ? L"" : L"";
-		const auto s5 = d2::getUnitStat(unit, STAT_COLDRESIST);
-		const wchar_t* i5 = s5 >= 100 ? L"" : L"";
-		const auto s6 = d2::getUnitStat(unit, STAT_POISONRESIST);
-		const wchar_t* i6 = s6 >= 100 ? L"" : L"";
-
-		static wchar_t res_str[100] = {};
-		swprintf_s(res_str, L"ÿc\x34%s%d ÿc\x03⌁ ÿc\x38%s%d ÿc\x03⌁ ÿc\x31%s%d ÿc\x03⌁ ÿc\x39%s%d ÿc\x03⌁ ÿc\x33%s%d ÿc\x03⌁ ÿc\x32%s%d", i1, s1, i2, s2, i3, s3, i4, s4, i5, s5, i6, s6);
-
-		const auto font = getFont(20);
-		font->setShadow(1);
-		font->setMasking(false);
-
-		const auto text_size = font->getTextSize(res_str);
-		font->drawText(res_str, { center - text_size.x / 2.0f, bar_pos.y - 3.0f }, g_text_colors.at(16));*/
-
-		int dr = d2::getUnitStat(unit, d2::STATS_DAMAGERESIST);
-		int mr = d2::getUnitStat(unit, d2::STATS_MAGICRESIST);
-		int fr = d2::getUnitStat(unit, d2::STATS_FIRERESIST);
-		int lr = d2::getUnitStat(unit, d2::STATS_LIGHTRESIST);
-		int cr = d2::getUnitStat(unit, d2::STATS_COLDRESIST);
-		int pr = d2::getUnitStat(unit, d2::STATS_POISONRESIST);
-		int lv = d2::getUnitStat(unit, d2::STATS_LEVEL);
-
-		if (dr | mr | fr | lr | cr | pr | lv) 
-		{
-			wstring szRes = L"ÿc0(Res:";
-			if (dr) szRes += L"ÿc7" + wstring(L" D") + to_wstring(dr); // Golden
-			if (mr) szRes += L"ÿc8" + wstring(L" M") + to_wstring(mr); // Orange
-			if (fr) szRes += L"ÿc1" + wstring(L" F") + to_wstring(fr); // Red
-			if (lr) szRes += L"ÿc9" + wstring(L" L") + to_wstring(lr); // Light yellow
-			if (cr) szRes += L"ÿc3" + wstring(L" C") + to_wstring(cr); // Blue
-			if (pr) szRes += L"ÿc2" + wstring(L" P") + to_wstring(pr); // Green
-			szRes += L"ÿc0)";
-			if (lv) szRes += L" (Lv: ÿc4" + to_wstring(lv) + L"ÿc0)"; // Green
-
+	if (App.show_monster_res) {
+		if (App.show_monster_res_in_mon_hp_bar == false && !szRes.empty()) {
 			const auto font = getFont(1);
 			font->setShadow(1);
 			font->setMasking(false);
 
 			const auto text_size = font->getTextSize(szRes.c_str());
 			font->drawText(szRes.c_str(), { center - text_size.x / 2.0f, bar_pos.y - 3.0f }, g_text_colors.at(16));
-
-			//FrameTextDraw(0, (*D2CLIENT_ScreenSizeY) - 61, 20, Center, 1, COL_WHITE, DRAWMODE_NORMAL, FALSE, szRes);
 		}
 	}
 }
@@ -994,8 +980,6 @@ inline wchar_t HDText::getColor(uint32_t color)
 
 void HDText::drawFpsCounter()
 {
-	return;
-
 	if (!App.show_fps || App.game.screen != GameScreen::InGame)
 		return;
 
@@ -1004,9 +988,9 @@ void HDText::drawFpsCounter()
 	swprintf_s(str, L"FPS: %.0f", fps);
 
 	const auto old_size = HDText::Instance().getTextSize();
-	d2::setTextSizeHooked(19);
+	d2::setTextSizeHooked(1);
 	const auto width = d2::getNormalTextWidthHooked(str);
-	d2::drawNormalTextHooked(str, App.game.size.x / 2 - width / 2, App.game.size.y - 58, 4, 0);
+	d2::drawNormalTextHooked(str, 5, 15, 4, 0);
 	d2::setTextSizeHooked(old_size);
 }
 
