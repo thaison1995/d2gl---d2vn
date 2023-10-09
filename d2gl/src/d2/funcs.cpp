@@ -118,6 +118,11 @@ char* getPlayerName(UnitAny* unit)
 	return (char*)(isVer(V_109d) ? unit->v109.pPlayerData->szName : unit->v110.pPlayerData->szName);
 }
 
+StatList* D2COMMON_GetStateStatList(UnitAny* pUnit, int nState)
+{
+	return GetStateStatList_Fn(pUnit, nState);
+}
+
 MonsterType getMonsterType(UnitAny* unit)
 {
 	if (isVer(V_109d)) {

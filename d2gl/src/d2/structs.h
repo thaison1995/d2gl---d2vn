@@ -93,6 +93,10 @@ enum class MonsterType {
 
 struct UnitAny;
 struct Room1;
+struct StatList;
+struct MonsterDataD2VN;
+
+typedef void(__fastcall* D2StatlistExpire_t)(UnitAny*, int, StatList*);
 
 #pragma pack(push, 1)
 struct DT1SubBlock {
@@ -337,6 +341,7 @@ struct UnitAny {
 				PlayerData* pPlayerData;
 				ItemData110* pItemData;
 				MonsterData110* pMonsterData;
+				MonsterDataD2VN* pMonsterDataD2VN;
 				void* pObjectData;
 			};
 			DWORD dwAct;
@@ -411,6 +416,87 @@ struct Room1 {
 	DWORD nNumClients;
 	Room1* pRoomNext;
 };
+
+struct Stat {
+	WORD nLayer; // 0x00
+	WORD nStat; // 0x02
+	int nValue; // 0x04
+};
+
+struct StatData // size 0x8
+{
+	Stat* pStat; // 0x00 An Array[wStatCount]
+	WORD nStatCount; // 0x04
+	WORD nBitSize; // 0x06
+	static const int nGrowthAmount = 4;
+	static const int nShrinkThreshold = 8;
+};
+
+struct StatList // 0x40
+{
+	void* pMemPool; // 0x00
+	UnitAny* pUnit; // 0x04
+	DWORD dwOwnerType; // 0x08
+	DWORD dwOwnerId; // 0x0C
+	DWORD dwFlags; // 0x10
+	union {
+		DWORD dwStateNo; // 0x14
+		DWORD dwState; // 0x14
+	};
+	DWORD ExpireFrame; // 0x18
+	DWORD SkillNo; // 0x1C
+	DWORD sLvl; // 0x20
+	StatData Stats; // 0x24 //D2StatDataStrc
+	StatList* pPrevLink; // 0x2C
+	StatList* pNextLink; // 0x30
+	StatList* pPrev; // 0x34
+	D2StatlistExpire_t pExpireFunc; // 0x38
+};
+
+struct UnkMonsterData 
+{
+	int32_t unk0x00; // 0x00
+	int32_t nLifePercentage; // 0x04
+	int32_t unk0x08; // 0x08
+	uint8_t nCount; // 0x0C
+	uint8_t pad0x0D[3]; // 0x0D
+};
+
+struct MonsterDataD2VN {
+	MonStatsTxt* pMonStatsTxt; // 0x00
+	BYTE Components[16]; // 0x04
+	WORD NameSeed; // 0x14
+	BYTE flags; // 0x16
+	BYTE nLastAnimMode; // 0x17
+	DWORD dwDurielFlag; // 0x18
+	BYTE nMonUMod[10]; // 0x1C
+	WORD nBossHcidx; // 0x26
+	void* pAiGeneral; // 0x28
+	union // 0x2C
+	{
+		void* pAiParam; // Server pMonster
+		wchar_t* wszMonName; // Client pMonster
+	};
+	void* pAiUnk; // 0x30
+	uint32_t unk0x34; // 0x34
+	uint32_t unk0x38; // 0x38
+	UnkMonsterData unk0x3C; // 0x3C
+	uint32_t unk0x4C; // 0x4C
+	DWORD pVision; // 0x50
+	DWORD dwAiState; // 0x54
+	DWORD dwTxtLevelNo; // 0x58
+	WORD bSummonerFlag; // 0x5C
+	BYTE pad0x5E[2]; // 0x5E
+	// Custom
+	int32_t nTypeMonster;
+	BYTE nLevelSkillsUp;
+	__int64 nHP;
+	__int64 nMaxHP;
+	int nCountCTC;
+	char szPlayerKill[20];
+	int nSkilllLevel[1024];
+};
+
 #pragma pack(pop)
 
 }

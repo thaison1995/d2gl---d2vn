@@ -95,4 +95,5 @@ void drawSubTextB();
 void drawSubTextC();
 void levelEntryText();
 
+StatList* D2COMMON_GetStateStatList(UnitAny* pUnit, int nState);
 }

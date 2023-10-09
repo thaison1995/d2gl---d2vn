@@ -843,6 +843,13 @@ void HDText::drawMonsterHealthBar(d2::UnitAny* unit)
 	const auto text_size = font->getTextSize(name);
 	float hp_percent = (float)hp / (float)max_hp;
 
+	d2::StatList* pStatList = d2::D2COMMON_GetStateStatList(unit, 288);
+	if (pStatList) {
+		const auto nhp = unit->v110.pMonsterDataD2VN->nHP;
+		const auto nmax_hp = unit->v110.pMonsterDataD2VN->nMaxHP;
+		hp_percent = (float)nhp / (float)nmax_hp;
+	} 
+
 	glm::vec2 bar_size = { 160.0f, 18.0f };
 	if (text_size.x + 40.0f > bar_size.x)
 		bar_size.x = text_size.x + 40.0f;

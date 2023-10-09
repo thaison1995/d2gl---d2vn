@@ -115,6 +115,8 @@ getUnitRoom_t getUnitRoom = (getUnitRoom_t)getProc((DLL_D2COMMON), (), (), (), (
 getLevelNoByRoom_t getLevelNoByRoom = (getLevelNoByRoom_t)getProc((DLL_D2COMMON), (), (), (), (), (), (), (-10691), ());
 uintptr_t getLevelName_Fn = getProc((DLL_D2CLIENT), (0x88420), (0x839F0), (0x9DC10), (0x61AA0), (0x8B1A0), (0xBE240), (0x18250), (0x53E70));
 
+GetStateStatList_t GetStateStatList_Fn = (GetStateStatList_t)getProc((DLL_D2COMMON), (), (), (), (), (), (-10871), (), ());
+
 // d2client + 0x291F8 : 1 2 3 4 (potion keys)
 // d2client + 0x27708 : life XX/XX
 // d2client + 0x277C7 : Mana XX/XX

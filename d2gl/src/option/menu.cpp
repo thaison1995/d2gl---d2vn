@@ -112,7 +112,8 @@ Menu::Menu()
 	m_fonts[12] = font2.size ? io.Fonts->AddFontFromMemoryTTF((void*)font2.data, font2.size, 12.0f) : io.Fonts->Fonts[0];
 
 	App.menu_title += (ISGLIDE3X() ? " (Glide / " : " (DDraw / ");
-	App.menu_title += "OpenGL: " + App.gl_ver_str + " / D2LoD: " + helpers::getVersionString() + " / " + helpers::getLangString() + ")";
+	//App.menu_title += "OpenGL: " + App.gl_ver_str + " / D2LoD: " + helpers::getVersionString() + " / " + helpers::getLangString() + ")";
+	App.menu_title += "OpenGL: " + App.gl_ver_str + " / D2VN" " / " + helpers::getLangString() + ")";
 }
 
 void Menu::toggle(bool force)
@@ -392,7 +393,9 @@ void Menu::draw()
 			drawSeparator();
 			//drawCheckbox_m("Show Monster Resistances", App.show_monster_res, "Show monster resistances on hp bar.", show_monster_res);
 			//drawSeparator();
+			ImGui::BeginDisabled(true);
 			drawCheckbox_m("Show Item Quantity", App.show_item_quantity, "Show item quantity on bottom left corner of icon.", show_item_quantity);
+			ImGui::EndDisabled();
 			drawSeparator();
 			drawCheckbox_m("Show FPS", App.show_fps, "FPS Counter on bottom center.", show_fps);
 			childEnd();
