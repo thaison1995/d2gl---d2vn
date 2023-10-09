@@ -666,7 +666,8 @@ void Context::onStageChange()
 	if (App.game.screen == GameScreen::Movie)
 		return;
 
-	switch (App.game.draw_stage) {
+	switch (App.game.draw_stage) 
+	{
 		case DrawStage::World:
 			break;
 		case DrawStage::UI:
@@ -676,7 +677,8 @@ void Context::onStageChange()
 			}
 			break;
 		case DrawStage::Map:
-			if (modules::MiniMap::Instance().isActive()) {
+			if (modules::MiniMap::Instance().isActive()) 
+			{
 				flushVertices();
 				m_blend_locked = true;
 				m_command_buffer[m_frame_index].pushCommand(CommandType::SetBlendState, 3);
@@ -684,7 +686,8 @@ void Context::onStageChange()
 			}
 			break;
 		case DrawStage::HUD:
-			if (modules::MiniMap::Instance().isActive()) {
+			if (modules::MiniMap::Instance().isActive()) 
+			{
 				flushVertices();
 				m_blend_locked = false;
 				m_command_buffer[m_frame_index].pushCommand(CommandType::SetBlendState, m_current_blend_index);
