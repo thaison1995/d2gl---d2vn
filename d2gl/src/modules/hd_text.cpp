@@ -843,9 +843,10 @@ void HDText::drawMonsterHealthBar(d2::UnitAny* unit)
 		int pr = d2::getUnitStat(unit, d2::STATS_POISONRESIST);
 		int lv = d2::getUnitStat(unit, d2::STATS_LEVEL);
 
-		if (dr | mr | fr | lr | cr | pr | lv) {
+		if (lv) szRes += L"ÿc0(Lv: ÿc4" + to_wstring(lv) + L"ÿc0)";
 
-			if (lv) szRes += L"ÿc0(Lv: ÿc4" + to_wstring(lv) + L"ÿc0)";
+		if (dr | mr | fr | lr | cr | pr) 
+		{
 			szRes += L"ÿc0(Res:";
 			if (dr) szRes += L"ÿc7" + wstring(L" D") + to_wstring(dr); // Golden
 			if (mr) szRes += L"ÿc8" + wstring(L" M") + to_wstring(mr); // Orange
