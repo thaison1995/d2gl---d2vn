@@ -34,7 +34,7 @@ struct TexData {
 struct TexUpdateQueue {
 	uint32_t count = 0;
 	uint32_t data_offset = 0;
-	std::array<TexData, 4096> tex_data = {};
+	std::array<TexData, 8192> tex_data = {};
 };
 
 enum class UBOType {
@@ -66,7 +66,7 @@ struct HDTextMasking {
 class CommandBuffer {
 	uint32_t m_count = 0;
 	Command* m_command = nullptr;
-	std::array<Command, 2048> m_commands;
+	std::array<Command, 4096> m_commands;
 
 	UBOUpdateQueue m_ubo_update_queue;
 	TexUpdateQueue m_tex_update_queue;
