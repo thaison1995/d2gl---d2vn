@@ -84,6 +84,7 @@ public:
 
 	glm::vec2 getTextSize(const wchar_t* str, const int max_chars = 0);
 	void drawText(const wchar_t* str, glm::vec2 pos, uint32_t color, bool framed = false);
+	uint32_t zyl_text_color = 0xFFFFFF;
 
 private:
 	float drawChar(wchar_t c, glm::vec2 pos, uint32_t color);

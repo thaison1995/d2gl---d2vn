@@ -459,6 +459,29 @@ struct MonsterDataD2VN;
 typedef void(__fastcall* D2StatlistExpire_t)(UnitAny*, int, StatList*);
 
 #pragma pack(push, 1)
+struct D2Seed {
+	union {
+		struct
+		{
+			union {
+				struct
+				{
+					DWORD dwLoSeed; // 0x00
+					DWORD dwHiSeed; // 0x04
+				};
+				struct
+				{
+					int nLowSeed; // 0x00
+					int nHighSeed; // 0x04
+				};
+			};
+		};
+
+		unsigned long long qwSeed; // 0x00
+		uint64_t lSeed; // 0x00
+	};
+};
+
 struct DT1SubBlock {
 	WORD xPos;
 	WORD yPos;
@@ -651,15 +674,58 @@ struct MonsterData109 {
 	DWORD anEnchants[9];
 };
 
+struct bItemFlags
+{
+	BYTE bNewItem : 1; // 1
+	BYTE bTarget : 1; // 2
+	BYTE bTargeting : 1; // 3
+	BYTE bDeleted : 1; // 4
+	BYTE bIdentified : 1; // 5
+	BYTE bQuantity : 1; // 6
+	BYTE bWeaponSetIn : 1; // 7
+	BYTE bWeaponSetOut : 1; // 8
+	BYTE bBroken : 1; // 9
+	BYTE bRepaired : 1; // 10
+	BYTE Flag11 : 1; // 11
+	BYTE bSocketed : 1; // 12
+	BYTE bNonSellable : 1; // 13
+	BYTE bInStore : 1; // 14 Also Has Been Picked Up
+	BYTE bNoEquip : 1; // 15
+	BYTE bNamed : 1; // 16
+	BYTE bOrgan : 1; // 17 Also bEar
+	BYTE bStarter : 1; // 18 Also bSellCheap
+	BYTE Flag19 : 1; // 19
+	BYTE bInit : 1; // 20
+	BYTE Flag21 : 1; // 21
+	BYTE bCompactSave : 1; // 22 Also bSimple
+	BYTE bEthereal : 1; // 23
+	BYTE bJustSaved : 1; // 24
+	BYTE bPersonalized : 1; // 25
+	BYTE bLowQuality : 1; // 26
+	BYTE bRuneword : 1; // 27
+	BYTE bItem : 1; // 28
+	BYTE _Unused1 : 1; // 29
+	BYTE _Unused2 : 1; // 30
+	BYTE _Unused3 : 1; // 31
+	BYTE _Unused4 : 1; // 32
+};
+
 struct ItemData110 {
 	ItemQuality dwQuality;
-	DWORD _1[2];
-	DWORD dwItemFlags;
-	DWORD _2[2];
-	DWORD dwFlags;
-	DWORD _3[3];
-	DWORD dwFileIndex;
-	DWORD dwItemLevel;
+	D2Seed pSeed; // 0x04
+	DWORD playerID; //+0C #10734 / #10735 (PCInventory->ptPlayer->0C)
+	DWORD seedStarting; //+10
+	DWORD flags1; //+14
+	union 
+	{
+		bItemFlags dwItemFlags; //+18
+		uint32_t dwItemFlagsEx; // 0x18
+	};
+	DWORD guid1; //+1C Global Unique ID 1
+	DWORD guid2; //+20 Global Unique ID 2
+	DWORD dwDeleteFrame; //+24 Global Unique ID 3 
+	DWORD dwFileIndex;		//0x28
+	DWORD dwItemLevel;		//0x2c
 	WORD wVersion;
 	WORD wRarePrefix;
 	WORD wRareSuffix;

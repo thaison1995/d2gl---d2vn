@@ -399,6 +399,8 @@ void Menu::draw()
 			ImGui::EndDisabled();
 			drawSeparator();
 			drawCheckbox_m("Show FPS", App.show_fps, "FPS Counter on bottom center.", show_fps);
+			drawSeparator();
+			drawCheckbox_m("Show Item Color Background", App.show_item_color_bg, "Show Item Color Background", show_item_color_bg);
 			//ImGui::BeginDisabled(true);
 			//drawCheckbox_m("Show Item Quantity", App.show_item_quantity, "Show item quantity on bottom left corner of icon.", show_item_quantity);
 			//ImGui::EndDisabled();

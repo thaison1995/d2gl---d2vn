@@ -275,6 +275,7 @@ bool HDText::drawText(const wchar_t* str, int x, int y, uint32_t color, uint32_t
 	return true;
 }
 
+uint32_t zyl_text_color = 0xFFFFFF;
 bool HDText::drawFramedText(const wchar_t* str, int x, int y, uint32_t color, uint32_t centered)
 {
 	if (!str || !isActive())
@@ -337,12 +338,49 @@ bool HDText::drawFramedText(const wchar_t* str, int x, int y, uint32_t color, ui
 		if (item && item->dwType == d2::UnitType::Item) {
 			const auto quality = d2::getItemQuality(item);
 			uint32_t border_color = m_border_color;
-			switch (quality) {
-				case d2::ItemQuality::Unique: border_color = 0x2B2215DD; break;
-				case d2::ItemQuality::Set: border_color = 0x1C3418DD; break;
-				case d2::ItemQuality::Rare: border_color = 0x31311EDD; break;
-				case d2::ItemQuality::Craft: border_color = 0x2F2102DD; break;
-				case d2::ItemQuality::Magic: border_color = 0x1D1D31DD; break;
+			switch (quality) 
+			{
+				case d2::ItemQuality::Unique: 
+					border_color = 0x2B2215DD; 
+					zyl_text_color = 0xDFB679FF;
+					break;
+				case d2::ItemQuality::Set: 
+					border_color = 0x1C3418DD; 
+					zyl_text_color = 0x25FE00FF;
+					break;
+				case d2::ItemQuality::Rare: 
+					border_color = 0x31311EDD; 
+					zyl_text_color = 0xEBEB75FF;
+					break;
+				case d2::ItemQuality::Craft: 
+					border_color = 0x2F2102DD; 
+					zyl_text_color = 0xEBEB75FF;
+					break;
+				case d2::ItemQuality::Magic: 
+					border_color = 0x1D1D31DD; 
+					zyl_text_color = 0x7B7BFEFF;
+					break;
+			}
+
+			auto itemData = item->v110.pItemData;
+			if (itemData->dwItemFlags.bRuneword) 
+			{
+				zyl_text_color = 0xD9CD8EFF;
+			}
+
+			if (App.show_item_color_bg && zyl_text_color != 0)
+			{
+				uint8_t r = (zyl_text_color >> 24) & 0xFF;
+				uint8_t g = (zyl_text_color >> 16) & 0xFF;
+				uint8_t b = (zyl_text_color >> 8) & 0xFF;
+				uint8_t a = zyl_text_color & 0xFF;
+				float p = 50.0 / 100.0;
+				float pb = 80.0 / 100.0;
+				r = round(r * p);
+				g = round(g * p);
+				b = round(b * p);
+				uint32_t newColor = (a) | (b << 8) | (g << 16) | (r << 24);
+				border_color = newColor;
 			}
 
 			pos.y = mid_y > cursor_y ? (float)(y - m_last_text_height) + 3.0f : (float)y - box_size.y;
@@ -380,6 +418,7 @@ bool HDText::drawFramedText(const wchar_t* str, int x, int y, uint32_t color, ui
 	font->setMasking(false);
 	font->setAlign(TextAlign::Center);
 	font->drawText(str, pos + padding, text_color, true);
+	zyl_text_color = font->zyl_text_color;
 	App.context->toggleDelayPush(false);
 
 	return true;

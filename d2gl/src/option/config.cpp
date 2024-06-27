@@ -135,6 +135,7 @@ namespace d2gl {
 		yamlFeatures["show_fps"] = App.show_fps;
 		yamlFeatures["show_mon_res"] = App.show_monster_res;
 		yamlFeatures["show_monster_res_in_mon_hp_bar"] = App.show_monster_res_in_mon_hp_bar;
+		yamlFeatures["show_item_color_bg"] = App.show_item_color_bg;
 		// yamlFeatures["hd_orbs"] = App.hd_orbs.active;
 		// yamlFeatures["hd_orbs_centered"] = App.hd_orbs.centered;
 	
@@ -236,6 +237,7 @@ namespace d2gl {
 		App.show_fps = d2gl::Config::GetBool("features", "show_fps", App.show_fps);
 		App.show_monster_res = d2gl::Config::GetBool("features", "show_mon_res", App.show_monster_res);
 		App.show_monster_res_in_mon_hp_bar = d2gl::Config::GetBool("features", "show_monster_res_in_mon_hp_bar", App.show_monster_res_in_mon_hp_bar);
+		App.show_item_color_bg = d2gl::Config::GetBool("features", "show_item_color_bg", App.show_item_color_bg);
 
 		// Other
 		App.gl_ver.x = d2gl::Config::GetInt("other", "gl_ver_major", App.gl_ver.x, 3, 4);
